@@ -12,19 +12,14 @@
 library(lubridate)
 library(countrycode)
 
+# URL with an example query of Syria data.
+url <- c("http://api.rwlabs.org/v0/report/list?fields[include][0]=date.created&fields[include][1]=url&fields[include][2]=title&query[value]=primary_country:Syria")
 
-
-
-test <- data.frame(fromJSON(getURLContent("http://api.rwlabs.org/v0/report/list?fields[include][0]=date.created&fields[include][1]=url&fields[include][2]=title&query[value]=primary_country:Syria&sort[0]=date.created:desc")))
-
-url <- getURLContent("http://api.rwlabs.org/v0/report/list?fields[include][0]=date.created&fields[include][1]=url&fields[include][2]=title&query[value]=primary_country:Syria")
-
-
-## example of query on Syria data. 
-http://api.rwlabs.org/v0/report/list?fields[include][0]=date.created&fields[include][1]=url&fields[include][2]=title&query[value]=primary_country:Syria&sort[0]=date.created:desc
+test <- data.frame(fromJSON(getURLContent(url)))
 
 rw.query <- function() { 
   require(rjson) # for reading the resulting JSON file.
+  require(RCurl) # for making HTTP requests.
 
       final <- data.frame() 
       
@@ -40,3 +35,8 @@ rw.query <- function() {
       return(final)
     }
 }
+
+
+
+json_data <- fromJSON(paste(readLines(url), collapse=""))
+

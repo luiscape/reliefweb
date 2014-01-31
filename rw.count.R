@@ -1,4 +1,8 @@
 ## Function to count the total of report available in RW. 
+#  Luis Capelo | @luiscape | capelo@un.org
+
+
+
 rw.count <- function() {
   require(rjson) # for reading the resulting JSON file.
   library(RCurl) # for queryig URLs. 
