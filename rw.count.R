@@ -2,17 +2,12 @@
 #  Luis Capelo | @luiscape | capelo@un.org
 
 rw.count <- function() {
-  require(rjson) # for reading the resulting JSON file.
-  require(RCurl) # for queryig URLs. Try to use `jsonlite` instead.
-  
+  require(rjson) # for reading the resulting JSON file. Try to use `jsonlite` instead.
+  require(RCurl) # for queryig URLs. 
   sys.time <- as.data.frame(Sys.time()) # Getting the current time.
   colnames(sys.time)[1] <- "sys.time"
-  
-  count <- data.frame(fromJSON(getURLContent("http://api.rwlabs.org/v0/report/count")))
-        
-  count <- count$data.count # Cleaning useless information.
-  
-  final <- cbind(sys.time, count)
-  
+    count <- data.frame(fromJSON(getURLContent("http://api.rwlabs.org/v0/report/count")))
+    count <- count$data.count # Cleaning useless information.
+    final <- cbind(sys.time, count)
   return(final)
 }
