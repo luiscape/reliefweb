@@ -8,12 +8,8 @@ rw.count <- function() {
   sys.time <- as.data.frame(Sys.time()) # Getting the current time.
   colnames(sys.time)[1] <- "sys.time"
   
-    count <- tryCatch( # Error handler.
-      data.frame(fromJSON(getURLContent("http://api.rwlabs.org/v0/report/count"))), 
-      error = function(e) e
-    )
-    if (inherits(count, "error")) { count <- c(NA) }
-  
+  count <- data.frame(fromJSON(getURLContent("http://api.rwlabs.org/v0/report/count")))
+        
   count <- count$data.count # Cleaning useless information.
   
   final <- cbind(sys.time, count)
