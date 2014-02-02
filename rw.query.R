@@ -47,7 +47,7 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
   
   ## Cleaning the data.
   rw.time <- function(df = "NA") {
-      df$date.created <- gsub("000", replacement = "", x = df$date.created) 
+      df$date.created <- df$date.created/1000
       df$date.created <- as.Date(as.POSIXct(as.numeric(df$date.created), origin = "1970-01-01"))
       return(df) 
   }
