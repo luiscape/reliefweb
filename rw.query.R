@@ -13,60 +13,79 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
                      field1 = "NA", 
                      field2 = "NA", 
                      field3 = "NA",
-                     clean.dates = c(TRUE, FALSE)) { 
+                     clean.dates = c(TRUE, FALSE)) {
   
   require(jsonlite) # for reading the resulting JSON file.
   require(RCurl) # for making HTTP requests.
-  
-  # RW functions. 
-#   require(rw.time) # for converting the Epoch times.
-#   require(rw.clean.dates) # for cleaning the weird dates.
-  
+
   # Building the query structure using HTTP POST.
-  base.url <- paste("http://api.rwlabs.org/v0/", type, "/list", "?limit=", limit, "&", sep="") # For now always `list`.
+  base.url <- paste("http://api.rwlabs.org/v0/", 
+                    type, 
+                    "/list", 
+                    "?limit=", 
+                    limit, 
+                    "&", sep="") # For now always `list`.
   
-  query <- data.frame() 
+  if (field1 != "NA") { url <- paste(base.url,"&fields[include][0]=", field1, sep = "") }
+      
+  if (field2 != "NA") { url <- paste(url,"&fields[include][1]=", field2, sep = "") }
   
-  if (field1 != "NA") { 
-    field1 <- paste(base.url,"&fields[include][0]=", field1, sep = "") 
-    url <- field1
-  } 
-  if (field2 != "NA") { 
-    field2 <- paste(base.url,"&fields[include][1]=", field2, sep = "")
-    url <- field2
-  }
-  if (field3 != "NA") {
-    field3 <- paste(base.url,"&fields[include][2]=", field3, sep = "")
-    url <- field3
-  }
-  
+  if (field3 != "NA") { url <- paste(url,"&fields[include][2]=", field3, sep = "") }
+
+
   url <- paste(url, 
                "&query[value]=primary_country:", 
                primary.country,
                "&sort[0]=date.created:desc", 
                sep = "")
   
+  print("This is the URL being fetched:")
   print(url)
+  
   ### Fetching the data.
   query <- data.frame(fromJSON(getURLContent(url)))
-  return(query)
-
   
   ## Cleaning the data.
+  rw.time <- function(df = "NA") {
+      df$date.created <- gsub("000", replacement = "", x = df$date.created) 
+      df$date.created <- as.Date(as.POSIXct(as.numeric(df$date.created), origin = "1970-01-01"))
+      return(df) 
+  }
+  
   title <- query$data.list.fields[1]
   query <- cbind(query,title)
+  colnames(query)[11] <- "title"
   
   date.created <- as.list(query$data.list.fields[2])
   query <- cbind(query, date.created)
-  query <- rw.time(query)
+  colnames(query)[12] <- "date.created"
+  
+  query <- rw.time(df = query)
+  
   
   rw.url <- as.list(query$data.list.fields[3])
   query <- cbind(query, rw.url)
+  colnames(query)[13] <- "rw.url"
+  
   
   query$data.list.fields <- NULL
-  
+
   # Creating a metadata data.frame.
   meta.data <- query[1, 1:7]
+  write.csv(meta.data, file = "metadata.csv", row.names = FALSE)
+
+  
+  # Cleaning the dates. 
+  rw.clean.dates <- function (df = "NA") { 
+    require(lubridate) 
+      x <- ymd(df$date.created) < ymd('2014-01-30')
+      df <- cbind(df, x)
+      x <- subset(df, df$x == 'TRUE') 
+    return(x) 
+  }
+  
+  
+  query <- rw.clean.dates(df = query)
   
   # Cleaning useless columns.
   x <- query[8]
@@ -74,10 +93,7 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
   
   query <- cbind(x,y)
 
+
   return(query)
-  
-  # Cleaning the dates. 
-  if (clean.dates == TRUE) { query <- clean.dates(query) } 
-    else return(query)
 
 }

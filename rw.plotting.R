@@ -8,7 +8,7 @@ library(ggplot2)
 dez <- subset(test, ymd(test$created) > ymd('2010-01-01')) 
 
 # Reports from 1970 until now. 
-ggplot(test, aes(created)) + theme_bw() +
+ggplot(test, aes(date.created)) + theme_bw() +
   geom_line(stat = 'bin', colour = '#0988bb', size = 1.3) + 
   geom_area(stat = 'bin', fill = '#0988bb', alpha = .3) +
   ylab('Number of Reports') + xlab('Year')
