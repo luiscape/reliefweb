@@ -4,27 +4,28 @@
 
 library(ggplot2)
 library(lubridate)
+library(scales) # for using scale_x_continuous by dividing it in each month.
 
 # Loading data.
-car <- read.csv('data/car.csv')
+car <- read.csv('data/Central African Republic.csv')
 mali <- read.csv('data/mali.csv')
 syria <- read.csv('data/syria.csv')
 phil <- read.csv('data/philippines.csv')
+# 
+# # Function to clean the 1970 dates -- check the Epoch converter. 
+# fix.dates <- function (df = NULL) { 
+#   df$date.created <- as.Date(df$date.created)
+#   x <- year(df$date.created) > year('1970-01-01') 
+#   y <- cbind(df, x)
+#   z <- subset(y, y$x == "TRUE")
+#   z[5] <- NULL
+#   return(z)
+# }
 
-# Function to clean the 1970 dates -- check the Epoch converter. 
-fix.dates <- function (df = NULL) { 
-  df$date.created <- as.Date(df$date.created)
-  x <- year(df$date.created) > year('1970-01-01') 
-  y <- cbind(df, x)
-  z <- subset(y, y$x == "TRUE")
-  z[5] <- NULL
-  return(z)
-}
-
-car <- fix.dates(car)
-mali <- fix.dates(mali)
-syria <- fix.dates(syria)
-phil <- fix.dates(phil)
+# car <- fix.dates(car)
+# mali <- fix.dates(mali)
+# syria <- fix.dates(syria)
+# phil <- fix.dates(phil)
 
 # Creating a single data.frame
 car$country <- 'Central African Republic'
@@ -33,6 +34,7 @@ syria$country <- 'Syria'
 phil$country <- 'Philippines'
   data <- rbind(car, mali, syria, phil)
 
+data$date.created <- as.Date(data$date.created)
 
 #### Plotting #### 
 
@@ -86,5 +88,19 @@ ggplot(phil, aes(date.created)) + theme_bw() +
   scale_x_date(limits = as.Date(c('2013-01-01','2014-02-28')), 
                breaks = date_breaks(width = "1 month")) + 
   scale_y_continuous(limits = c(0,300))
+
+
+
+
+
+#### Collectin all the data from Syria. #### 
+
+http://api.rwlabs.org/v0/report/list?limit=1000&fields[include][0]=url&fields[include][1]=title&fields[include][2]=date.created&query[value]=primary_country:Syria&filter[field]=date.created&field[value][0]=to:1388448000000&sort[0]=date.created:desc
+
+GMT: Thu, 29 Aug 2013 20:06:52 GMT
+
+http://api.rwlabs.org/v0/report/list?limit=1000&fields[include][0]=url&fields[include][1]=title&fields[include][2]=date.created&query[value]=primary_country:Syria&conditions[field]=date.created&conditions[value]=to:1199145600000&sort[0]=date.created:desc
+
+
 
 

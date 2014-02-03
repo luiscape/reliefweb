@@ -1,11 +1,14 @@
-## This code has been written with th objective of exploring if the data coming from ReliefWeb could be used
+## This code has been written with th objective of exploring if 
+# the data coming from ReliefWeb could be used
 # as an indicator of activity in the Humanitarian Sector. 
 #  
-#  Luis Capelo | capelo@un.org | @luiscape
+#  Author: Luis Capelo | capelo@un.org | @luiscape
 
 ## Code Structure 
 # The documentation for the API is available here: http://apidoc.rwlabs.org/
 # The type can be: report, job, training, country, disaster. 
+
+
 
 rw.query <- function(type = c("report", "job", "training", "country", "disaster"),
                      limit = c(1:1000), 
@@ -72,8 +75,7 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
 
   # Creating a metadata data.frame.
   meta.data <- query[1, 1:7]
-  write.csv(meta.data, file = "metadata.csv", row.names = FALSE)
-
+  write.csv(meta.data, file = "data/metadata.csv", row.names = FALSE)
   
   # Cleaning the dates. 
   rw.clean.dates <- function (df = "NA") { 
@@ -84,16 +86,15 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
     return(x) 
   }
   
-  
   query <- rw.clean.dates(df = query)
   
   # Cleaning useless columns.
-  x <- query[8]
-  y <- query[10:12]
-  
+    x <- query[8]
+    y <- query[10:12]
   query <- cbind(x,y)
-
-
+  
+  # Storing the resulting data in a CSV file.
+  write.csv(query, file = paste("data/", primary.country, ".csv", sep = ""))
+  
   return(query)
-
 }
