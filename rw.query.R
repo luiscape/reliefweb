@@ -34,6 +34,14 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
   if (field2 != "NA") { url <- paste(url,"&fields[include][1]=", field2, sep = "") }
   
   if (field3 != "NA") { url <- paste(url,"&fields[include][2]=", field3, sep = "") }
+  
+  
+  # add for loop here. 
+  for (i in 1:ceiling(5100/limit)) {
+    url <- paste(url, "&filter[field]=date.created&filter[value][to]=", to, sep = "")
+  }
+  
+  if (field3 != "NA") { url <- paste(url,"&fields[include][2]=", field3, sep = "") } ## add the to: filter here.
 
   url <- paste(url, 
                "&query[value]=primary_country:", 
@@ -46,11 +54,6 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
   
   ### Fetching the data.
   query <- data.frame(fromJSON(getURLContent(url)))
-
-#   # add for loop here. 
-#   for (i in 1:7) {
-#     url <- paste(url, "&filter[field]=date.created&filter[value][to]=", to, sep = "")
-#   }
   
   ## Cleaning the data.
   rw.time <- function(df = "NA") {
