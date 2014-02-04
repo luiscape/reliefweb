@@ -35,7 +35,6 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
   
   if (field3 != "NA") { url <- paste(url,"&fields[include][2]=", field3, sep = "") }
 
-
   url <- paste(url, 
                "&query[value]=primary_country:", 
                primary.country,
@@ -47,6 +46,11 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
   
   ### Fetching the data.
   query <- data.frame(fromJSON(getURLContent(url)))
+
+#   # add for loop here. 
+#   for (i in 1:7) {
+#     url <- paste(url, "&filter[field]=date.created&filter[value][to]=", to, sep = "")
+#   }
   
   ## Cleaning the data.
   rw.time <- function(df = "NA") {
@@ -70,12 +74,15 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
   query <- cbind(query, rw.url)
   colnames(query)[13] <- "rw.url"
   
-  
   query$data.list.fields <- NULL
 
   # Creating a metadata data.frame.
   meta.data <- query[1, 1:7]
   write.csv(meta.data, file = "data/metadata.csv", row.names = FALSE)
+  
+  # Get the first epoch.
+  a <- nrow(query)
+  to <- query[a, 3]
   
   # Cleaning the dates. 
   rw.clean.dates <- function (df = "NA") { 
@@ -92,9 +99,13 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
     x <- query[8]
     y <- query[10:12]
   query <- cbind(x,y)
+
   
   # Storing the resulting data in a CSV file.
   write.csv(query, file = paste("data/", primary.country, ".csv", sep = ""))
   
   return(query)
 }
+
+
+
