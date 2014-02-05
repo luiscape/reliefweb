@@ -1,8 +1,9 @@
 ## Plotting ##
 # Create plotting functions with ggplot2. 
+# Final plotting function with ggplot2.
 
 library(ggplot2)
-
+library(scales) # for working with scale_x_continuous and divide the breaks in months, etc.
 
 # Subsetting from 2010 unti now. I haven't been able to use scale_x_continuous.
 dez <- subset(test, ymd(test$created) > ymd('2010-01-01')) 
