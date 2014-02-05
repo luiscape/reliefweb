@@ -1,13 +1,14 @@
 ## Function to count the total of report available in RW. 
-#  Luis Capelo | @luiscape | capelo@un.org
+#  Author: Luis Capelo | @luiscape | capelo@un.org
 
-rw.count <- function() {
-  require(rjson) # for reading the resulting JSON file. Try to use `jsonlite` instead.
+rw.count <- function(type = c("report", "job", "training", "country", "disaster")) {
+  require(jsonlite) # for reading the resulting JSON file. Try to use `jsonlite` instead.
   require(RCurl) # for queryig URLs. 
   sys.time <- as.data.frame(Sys.time()) # Getting the current time.
   colnames(sys.time)[1] <- "sys.time"
-    count <- data.frame(fromJSON(getURLContent("http://api.rwlabs.org/v0/report/count")))
+    url <- paste("http://api.rwlabs.org/v0/", type, "/count", sep = "")
+    count <- data.frame(fromJSON(getURLContent(url)))
     count <- count$data.count # Cleaning useless information.
-    final <- cbind(sys.time, count)
-  return(final)
+    x <- cbind(sys.time, count)
+  return(x)
 }
