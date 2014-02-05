@@ -28,7 +28,7 @@ data$date.created <- as.Date(data$date.created)
 ggplot(data, aes(as.Date(date.created))) + theme_bw() +
   geom_line(stat = 'bin', colour = '#0988bb', size = 1.3) + 
   geom_area(stat = 'bin', fill = '#0988bb', alpha = .3) +
-  ylab('Number of Reports') + xlab('Month') +
+  ylab('Number of Reports') + xlab('Year') +
   scale_x_date(limits = as.Date(c('2000-01-01','2014-01-01')), 
                breaks = date_breaks(width = "1 year")) +
   facet_wrap(~ country) + 
