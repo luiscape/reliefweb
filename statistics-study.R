@@ -74,9 +74,3 @@ ggplot(phil, aes(date.created)) + theme_bw() +
   scale_x_date(limits = as.Date(c('2013-01-01','2014-02-28')), 
                breaks = date_breaks(width = "1 month")) + 
   scale_y_continuous(limits = c(0,300))
-
-
-
-
-
-

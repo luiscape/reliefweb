@@ -23,7 +23,6 @@ ggplot(dez, aes(created)) + theme_bw() +
 
 
 # Snippets. 
-
 geom_vline(xintercept = 1989, colour = "#cccccc", linetype = "longdash") +
 scale_x_continuous(limits = c(1960,2014), breaks = c(1960,1970,1980,1990,2000,2010)) + 
   
