@@ -22,15 +22,70 @@ philippines$country <- 'Philippines'
 
 data$date.created <- as.Date(data$date.created)
 
+drc.jobs$type <- c('jobs')
+drc$type <- c('report')
+drc <- rbind(drc.jobs, drc)
+
 #### Plotting #### 
 
 # Number of reports using facets.
-ggplot(data, aes(as.Date(date.created))) + theme_bw() +
+ggplot(drc, aes(as.Date(date.created))) + theme_bw() +
   geom_line(stat = 'bin', colour = '#0988bb', size = 1.3) + 
-  geom_area(stat = 'bin', fill = '#0988bb', alpha = .3) +
+#   geom_area(stat = 'bin', fill = '#0988bb', alpha = .3) +
   ylab('Number of Reports') + xlab('Year') +
   scale_x_date(limits = as.Date(c('2000-01-01','2014-01-01')), 
-               breaks = date_breaks(width = "1 year")) +
+               breaks = date_breaks(width = "1 year")) + 
+  facet_wrap(~ type, scales = "free") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), 
+        panel.grid = element_line(colour = "white"), 
+        panel.grid.minor = element_line(colour = "white"),
+        panel.grid.major = element_line(colour = "white"),
+        panel.border = element_rect( colour = "white"),
+        panel.border = element_rect(fill = NA, colour = NA),
+        strip.background =  element_rect(fill = "#d3d3d3", colour = NA),
+        axis.text.x = element_text(angle = 90, hjust = 1)
+        )
+
+# calculating correlations
+drc$date.created <- as.Date(drc$date.created)
+drc.jobs$date.created <- as.Date(drc.jobs$date.created)
+
+drc$month <- month(drc$date.created)
+drc$year <- year(drc$date.created)
+drc$time <- paste(drc$month, "-", drc$year, sep = "")
+
+
+drc.jobs$month <- month(drc.jobs$date.created)
+drc.jobs$year <- year(drc.jobs$date.created)
+drc.jobs$time <- paste(drc.jobs$month, "-", drc.jobs$year, sep = "")
+
+drc.m <- as.data.frame(count(drc$time))
+colnames(drc.m)[1] <- "date"
+drc.jobs.m <- as.data.frame(count(drc.jobs$time))
+colnames(drc.jobs.m)[1] <- "date"
+
+
+cor.data <- merge(drc.m, drc.jobs.m, by = "date")
+
+cor(cor.data$freq.x, cor.data$freq.y, use = "pairwise")
+
+ggplot(cor.data, aes(freq.x, freq.y)) + geom_point() + stat_smooth()
+
+
+# Number of reports using facets.
+ggplot(drc.jobs, aes(as.Date(date.created))) + theme_bw() +
+  geom_line(stat = 'bin', colour = '#0988bb', size = 1.3) + 
+  #   geom_area(stat = 'bin', fill = '#0988bb', alpha = .3) +
+  ylab('Number of Reports') + xlab('Year') +
+  scale_x_date(breaks = date_breaks(width = "1 year")) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), 
+        panel.grid = element_line(colour = "white"), 
+        panel.grid.minor = element_line(colour = "white"),
+        panel.grid.major = element_line(colour = "white"),
+        panel.border = element_rect( colour = "white")
+  )
+
+
   facet_wrap(~ country) + 
   theme( panel.border = element_rect(fill = NA, colour = NA),
          strip.background =  element_rect(fill = "#d3d3d3", colour = NA),
@@ -74,3 +129,7 @@ ggplot(phil, aes(date.created)) + theme_bw() +
   scale_x_date(limits = as.Date(c('2013-01-01','2014-02-28')), 
                breaks = date_breaks(width = "1 month")) + 
   scale_y_continuous(limits = c(0,300))
+
+
+drc$duplicated <- duplicated(drc)
+drc <- subset(drc, drc$duplicated == FALSE)

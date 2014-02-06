@@ -14,8 +14,7 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
                      primary.country = "Syria",
                      field1 = "NA",
                      field2 = "NA",
-                     field3 = "NA",
-                     clean.dates = c(TRUE, FALSE)) {
+                     field3 = "NA") {
   
   require(jsonlite) # for reading the resulting JSON file.
   require(RCurl) # for making HTTP requests.
@@ -34,7 +33,7 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
                      "/count", 
                      "?limit=", 
                      limit, 
-                     "&", sep="") # this one is for the count.
+                     sep="") # this one is for the count.
   
   if (field1 != "NA") { query.url <- paste("&fields[include][0]=", field1, sep = "") }
       
@@ -102,8 +101,15 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
   # Creating iterations to go around the limits issue.
   rw.it <- function(df = "NA") {
     final <- df
-    for (i in 2:ceiling(count/limit)) {
-      print(paste("This is iteration number: ", print(i), " out of ", ceiling(count/limit), " And we have fetched ", nrow(final), " out of ", print(count), " rows.", sep = ""))
+    
+    # create progress bar
+    total <- ceiling(count/limit)
+    pb <- txtProgressBar(min = 0, max = total, style = 3)
+    
+    for (i in 2:total) {
+      Sys.sleep(0.1)
+      # update progress bar
+      setTxtProgressBar(pb, i)
       
         to <- final$date.created[nrow(final)]
         
@@ -127,6 +133,7 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
         
         final <- rbind(final, x)
     }
+    close(pb)
     return(final)
   } 
 
@@ -149,6 +156,16 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
     y <- query[10:12]
   query <- cbind(x,y)
   
+  # Cleaning duplicate entries. 
+  rw.clean.duplicates <- function(df = "NA") {
+    query$duplicated <- duplicated(query)
+    x <- subset(query, query$duplicated == FALSE) 
+    x$duplicated <- NULL
+    return(x)
+  }
+
+  query <- rw.clean.duplicates(query)
+
   # Storing the resulting data in a CSV file.
   write.csv(query, file = paste("data/", primary.country, ".csv", sep = ""))
   
