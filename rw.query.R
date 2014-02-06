@@ -11,7 +11,7 @@
 
 rw.query <- function(type = c("report", "job", "training", "country", "disaster"),
                      limit = c(1:1000), 
-                     primary.country = "Syria",
+                     country = "Syria",
                      field1 = "NA",
                      field2 = "NA",
                      field3 = "NA") {
@@ -26,7 +26,7 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
                     "/list", 
                     "?limit=", 
                     limit, 
-                    "&", sep="") # this one is for the data.
+                    sep="") # this one is for the data.
   
   count.url <- paste("http://api.rwlabs.org/v0/", 
                      type, 
@@ -42,14 +42,14 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
   if (field3 != "NA") { query.url <- paste(query.url,"&fields[include][2]=", field3, sep = "") }
 
   url <- paste(base.url, query.url, 
-               "&query[value]=primary_country:", 
-               primary.country,
+               "&query[value]=country:", 
+               country,
                "&sort[0]=date.created:desc", 
                sep = "")
   
   c.url <- paste(count.url, 
-                 "&query[value]=primary_country:", 
-                 primary.country,
+                 "&query[value]=country:", 
+                 country,
                  "&sort[0]=date.created:desc", 
                  sep = "")
   
@@ -166,8 +166,10 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
 
   query <- rw.clean.duplicates(query)
 
+  query$country <- country
+
   # Storing the resulting data in a CSV file.
-  write.csv(query, file = paste("data/", primary.country, ".csv", sep = ""))
+  write.csv(query, file = paste("data/", country, "-", type, ".csv", sep = ""))
   
   return(query)
 }
