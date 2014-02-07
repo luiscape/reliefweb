@@ -84,25 +84,35 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
       return(df) 
   }
   
-  list1 <- as.list(query$data.list.fields[1])
-  query <- cbind(query,list1)
-  colnames(query)[11] <- field1
+  if (field1 != "NA") {
+    list1 <- as.list(query$data.list.fields[1])
+    query <- cbind(query,list1)
+    colnames(query)[11] <- field1
+  }
   
-  list2 <- as.list(query$data.list.fields[2])
-  query <- cbind(query, list2)
-  colnames(query)[12] <- field2
+  if (field2 != "NA") {
+    list2 <- as.list(query$data.list.fields[2])
+    query <- cbind(query, list2)
+    colnames(query)[12] <- field2
+  }
   
-  list3 <- as.list(query$data.list.fields[3])
-  query <- cbind(query, list3)
-  colnames(query)[13] <- field3
+  if (field3 != "NA") {
+    list3 <- as.list(query$data.list.fields[3])
+    query <- cbind(query, list3)
+    colnames(query)[13] <- field3
+  }
   
-  list4 <- as.list(query$data.list.fields[4])
-  query <- cbind(query, list4)
-  colnames(query)[14] <- field4
+  if (field4 != "NA") {
+    list4 <- as.list(query$data.list.fields[4])
+    query <- cbind(query, list4)
+    colnames(query)[14] <- field4
+  }
   
-  list5 <- as.list(query$data.list.fields[5])
-  query <- cbind(query, list5)
-  colnames(query)[15] <- field5
+  if (field5 != "NA") {
+    list5 <- as.list(query$data.list.fields[5])
+    query <- cbind(query, list5)
+    colnames(query)[15] <- field5
+  }
   
   query$data.list.fields <- NULL
 
@@ -128,23 +138,41 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
         to <- final$date.created[nrow(final)]
         
         it.url <- paste(url, "&filter[field]=date.created&filter[value][to]=", format(to, scientific = FALSE), sep = "")
-      
+        
         x <- data.frame(fromJSON(getURLContent(it.url)))
+
+        if (field1 != "NA") {
+          list1 <- as.list(x$data.list.fields[1])
+          x <- cbind(x,list1)
+          colnames(x)[11] <- field1
+        }
         
-        title <- x$data.list.fields[1]
-        x <- cbind(x,title)
-        colnames(x)[11] <- "title"
+        if (field2 != "NA") {
+          list2 <- as.list(x$data.list.fields[2])
+          x <- cbind(x, list2)
+          colnames(x)[12] <- field2
+        }
         
-        date.created <- as.list(x$data.list.fields[2])
-        x <- cbind(x, date.created)
-        colnames(x)[12] <- "date.created"
+        if (field3 != "NA") {
+          list3 <- as.list(x$data.list.fields[3])
+          x <- cbind(x, list3)
+          colnames(x)[13] <- field3
+        }
         
-        rw.url <- as.list(x$data.list.fields[3])
-        x <- cbind(x, rw.url)
-        colnames(x)[13] <- "rw.url"
+        if (field4 != "NA") {
+          list4 <- as.list(x$data.list.fields[4])
+          x <- cbind(x, list4)
+          colnames(x)[14] <- field4
+        }
+        
+        if (field5 != "NA") {
+          list5 <- as.list(x$data.list.fields[5])
+          x <- cbind(x, list5)
+          colnames(x)[15] <- field5
+        }
         
         x$data.list.fields <- NULL
-        
+      
         final <- rbind(final, x)
     }
     close(pb)

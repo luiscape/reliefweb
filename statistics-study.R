@@ -133,3 +133,10 @@ ggplot(phil, aes(date.created)) + theme_bw() +
 
 drc$duplicated <- duplicated(drc)
 drc <- subset(drc, drc$duplicated == FALSE)
+
+
+
+
+
+#### Jobs ####
+syria <- read.csv('data/Syria-job.csv')
