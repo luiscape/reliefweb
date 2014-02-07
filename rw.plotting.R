@@ -9,7 +9,7 @@ library(scales) # for working with scale_x_continuous and divide the breaks in m
 #### Plotting #### 
 
 # Number of reports using facets.
-ggplot(data, aes(as.Date(date.created))) + theme_bw() +
+ggplot(data, aes(date.created)) + theme_bw() +
   geom_line(stat = 'bin', colour = '#0988bb', size = 1.3) + 
   #   geom_area(stat = 'bin', fill = '#0988bb', alpha = .3) +
   ylab('Number of Reports') + xlab('Year') +

@@ -14,7 +14,9 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
                      country = "Syria",
                      field1 = "NA",
                      field2 = "NA",
-                     field3 = "NA") {
+                     field3 = "NA", 
+                     field4 = "NA", 
+                     field5 = "NA") {
   
   require(jsonlite) # for reading the resulting JSON file.
   require(RCurl) # for making HTTP requests.
@@ -40,6 +42,10 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
   if (field2 != "NA") { query.url <- paste(query.url,"&fields[include][1]=", field2, sep = "") }
   
   if (field3 != "NA") { query.url <- paste(query.url,"&fields[include][2]=", field3, sep = "") }
+  
+  if (field4 != "NA") { query.url <- paste(query.url,"&fields[include][3]=", field4, sep = "") }
+  
+  if (field5 != "NA") { query.url <- paste(query.url,"&fields[include][4]=", field5, sep = "") }
 
   url <- paste(base.url, query.url, 
                "&query[value]=country:", 
@@ -78,17 +84,25 @@ rw.query <- function(type = c("report", "job", "training", "country", "disaster"
       return(df) 
   }
   
-  title <- query$data.list.fields[1]
-  query <- cbind(query,title)
-  colnames(query)[11] <- "title"
+  list1 <- as.list(query$data.list.fields[1])
+  query <- cbind(query,list1)
+  colnames(query)[11] <- field1
   
-  date.created <- as.list(query$data.list.fields[2])
-  query <- cbind(query, date.created)
-  colnames(query)[12] <- "date.created"
+  list2 <- as.list(query$data.list.fields[2])
+  query <- cbind(query, list2)
+  colnames(query)[12] <- field2
   
-  rw.url <- as.list(query$data.list.fields[3])
-  query <- cbind(query, rw.url)
-  colnames(query)[13] <- "rw.url"
+  list3 <- as.list(query$data.list.fields[3])
+  query <- cbind(query, list3)
+  colnames(query)[13] <- field3
+  
+  list4 <- as.list(query$data.list.fields[4])
+  query <- cbind(query, list4)
+  colnames(query)[14] <- field4
+  
+  list5 <- as.list(query$data.list.fields[5])
+  query <- cbind(query, list5)
+  colnames(query)[15] <- field5
   
   query$data.list.fields <- NULL
 
