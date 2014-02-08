@@ -11,7 +11,6 @@ At this point, the basic querying function is the following:
 
 ```
 rw.query()
-
 ```
 
 It acceps the following paramenters:
@@ -21,7 +20,6 @@ type = "report", "job" (Other types will be added soon.)
 limit = 1 to 1000 (Not really that relevant in this version.)
 country = "Full name of the country of interest."
 field1 to 3 = "date.created", "title", "url" (More fields will be added soon.)
-
 ```
 
 The function currently works well with up to three fields.
@@ -37,11 +35,11 @@ syria <- rw.query(type = "report", limit = 1000, country = "Syria", field1 = "da
 
 The result will be:
 
-[image]
+![Resulting data.frame](https://raw.github.com/luiscape/reliefweb-study/readme/dataframe.png)
 
 Which you can plot using `ggplot2` into: 
 
-[image2]
+![Resulting data.frame](https://raw.github.com/luiscape/reliefweb-study/graphics/https://raw.github.com/luiscape/reliefweb-study/master/graphics/reports-dr-congo.png)
 
 
 License
