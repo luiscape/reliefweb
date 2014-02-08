@@ -39,7 +39,7 @@ The result will be:
 
 Which you can plot using `ggplot2` into: 
 
-![Resulting data.frame](https://raw.github.com/luiscape/reliefweb-study/graphics/https://raw.github.com/luiscape/reliefweb-study/master/graphics/reports-dr-congo.png)
+![Resulting data.frame](https://raw.github.com/luiscape/reliefweb-study/master/graphics/reports-dr-congo.png)
 
 
 License
