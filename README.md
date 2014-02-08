@@ -1,7 +1,47 @@
 ReliefWeb R Package
 ===================
 
-Studying the ReliefWeb API -- and designing a package while doing it. 
+This _yet-to-be-package_ is designed to query ReliefWeb's upcoming API (still in __alpha__) for statistical analysis. It allows you to fetch all the data from a certain query, effectively overriding the 1000-results limitation. The result is an R `data.frame` ready for analysis.
+
+
+Usage
+-----
+
+At this point, the basic querying function is the following:
+
+```
+rw.query()
+
+```
+
+It acceps the following paramenters:
+
+```
+type = "report", "job" (Other types will be added soon.)
+limit = 1 to 1000 (Not really that relevant in this version.)
+country = "Full name of the country of interest."
+field1 to 3 = "date.created", "title", "url" (More fields will be added soon.)
+
+```
+
+The function currently works well with up to three fields.
+
+
+Example
+-------
+For getting all the reports available in ReliefWeb that have Syria as their primary country (clarify this!) you can do:
+
+```
+syria <- rw.query(type = "report", limit = 1000, country = "Syria", field1 = "date.created", field2 = "title", field3 = "url")
+```
+
+The result will be:
+
+[image]
+
+Which you can plot using `ggplot2` into: 
+
+[image2]
 
 
 License

@@ -1,6 +1,8 @@
 ## This code has been written with th objective of exploring if 
 # the data coming from ReliefWeb could be used
 # as an indicator of activity in the Humanitarian Sector. 
+# 
+#  Version:  0.1
 #  
 #  Author: Luis Capelo | capelo@un.org | @luiscape
 

@@ -9,13 +9,11 @@ library(scales) # for working with scale_x_continuous and divide the breaks in m
 #### Plotting #### 
 
 # Number of reports using facets.
-ggplot(haiti.reports, aes(date.created)) + theme_bw() +
+ggplot(south.sudan, aes(date.created)) + theme_bw() +
   geom_line(stat = 'bin', colour = '#0988bb', size = 1.3) + 
   #   geom_area(stat = 'bin', fill = '#0988bb', alpha = .3) +
   ylab('Number of Reports') + xlab('Year') +
-  scale_x_date(limits = as.Date(c('2000-01-01','2013-01-01')), 
-               breaks = date_breaks(width = "1 year")) + 
-  facet_wrap(~ country) + 
+  scale_x_date(limits = as.Date(c('2011-01-01','2013-01-01'))) + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1), 
         panel.grid = element_line(colour = "white"), 
         panel.grid.minor = element_line(colour = "white"),
