@@ -35,9 +35,17 @@ syria <- rw.query(type = "report", limit = 1000, country = "Syria", field1 = "da
 
 The result will be:
 
+```
+View(syria)
+```
+
 ![Resulting data.frame](https://raw.github.com/luiscape/reliefweb-study/master/readme/dataframe.png)
 
 Which you can plot using `ggplot2` into: 
+
+```
+[ggplot2 plotting code here]
+```
 
 ![Plotting the number of reports for DR of the Congo. ](https://raw.github.com/luiscape/reliefweb-study/master/graphics/reports-dr-congo.png)
 
