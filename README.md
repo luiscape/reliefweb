@@ -9,13 +9,13 @@ Usage
 
 At this point, the basic querying function is the following:
 
-```
+```R
 rw.query()
 ```
 
 It acceps the following paramenters:
 
-```
+```R
 type = "report", "job" (Other types will be added soon.)
 limit = 1 to 1000 (Not really that relevant in this version.)
 country = "Full name of the country of interest."
@@ -29,13 +29,13 @@ Example
 -------
 For getting all the reports available in ReliefWeb that have Syria as their primary country (clarify this!) you can do:
 
-```
+```R
 syria <- rw.query(type = "report", limit = 1000, country = "Syria", field1 = "date.created", field2 = "title", field3 = "url")
 ```
 
 The result will be:
 
-```
+```R
 View(syria)
 ```
 
@@ -43,7 +43,7 @@ View(syria)
 
 Which you can plot using `ggplot2` into: 
 
-```
+```R
 [ggplot2 plotting code here]
 ```
 
