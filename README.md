@@ -44,7 +44,7 @@ View(syria)
 Which you can plot using `ggplot2` into:
 
 ```r
-ggplot(syria) + theme_bw() + geom_line(aes(created), stat = 'bin', color = "#0988bb", size = 1)
+ggplot(syria) + theme_bw() + geom_line(aes(created), stat = 'bin', color = "#0988bb", size = 1.5)
 ```
 
 ![Plotting the number of reports for Syria.](https://raw.github.com/luiscape/reliefweb-study/master/readme/reports-syria.png)
