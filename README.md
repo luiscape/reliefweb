@@ -17,9 +17,9 @@ It acceps the following paramenters:
 
 ```r
 type = "report", "job" (Other types will be added soon.)
-limit = 1 to 1000 (Not really that relevant in this version.)
+limit = 1 to 1000, and "all"
 country = "Full name of the country of interest."
-field1 to 3 = "date.created", "title", "url" (More fields will be added soon.)
+field1 to 5 = up to 5 fields using any fields available in the API. 
 ```
 
 The function currently works well with up to three fields.
@@ -56,9 +56,11 @@ ggplot(syria) +
 Roadmap
 -------
 1. Release first compiled version (0.1) using `dev-tools`.
-2. Finish the first version of the `rw.plot` function. 
-3. Host and run the package on a web server. 
-4. Create a User Interface for the querier. 
+2. Create a `codebook` for the API.
+3. Finish the first version of the `rw.plot` function. 
+4. Write the article `Introducing Reliefweb as a real-time source of data`. 
+5. Host and run the package on a web server. 
+6. Create a User Interface for the querier. 
 
 
 License
