@@ -30,7 +30,7 @@ Example
 For getting all the reports available in ReliefWeb that have Syria as their primary country (clarify this!) you can do:
 
 ```r
-syria <- rw.query(type = 'report', limit = "all", country = 'Syria', field1 = 'url', field2 = 'title', field3 = 'date.created')
+syria <- rw.query(type = 'report', limit = 'all', country = 'Syria', field1 = 'url', field2 = 'title', field3 = 'date.created', field4 = 'body-html')
 ```
 
 The result will be:
@@ -50,6 +50,15 @@ ggplot(syria) +
 ```
 
 ![Plotting the number of reports for Syria.](https://raw.github.com/luiscape/reliefweb-study/master/readme/reports-syria.png)
+
+
+
+Roadmap
+-------
+1. Release first compiled version (0.1) using `dev-tools`.
+2. Finish the first version of the `rw.plot` function. 
+3. Host and run the package on a web server. 
+4. Create a User Interface for the querier. 
 
 
 License
