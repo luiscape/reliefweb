@@ -10,9 +10,9 @@
 #  Author: Luis Capelo | capelo@un.org | @luiscape
 
 
-rw.query <- function(type = c("report", "job"), # These are the only two options available.
-                     limit = c(1:1000, "all"), # 'all' means retreive all metadata from a certain query.
-                     country = c("NA", "all"), # 'all' fetches data from the whole database.
+rw.query <- function(type = c("report", "job"),  # These are the only two options available.
+                     limit = NULL,  # Can be a number from 1 to 1000 or "all".
+                     country = c("NA", "all"),  # 'all' fetches data from the whole database.
                      field1 = "NA",
                      field2 = "NA",
                      field3 = "NA",
@@ -30,7 +30,7 @@ rw.query <- function(type = c("report", "job"), # These are the only two options
   country.url <- c("&query[value]=country:")
 
   # If a limit isn't established, then it is emplied that we'll get all the data.
-  if (is.null(limit) == TRUE) { limit <- c(1000) }
+  if (is.null(limit) == TRUE) { stop("Please provide the 'limit' parameter.") }
   if (limit == "all") { limit <- c(1000) }
   if (country == "all") { country <- NULL
                           country.url <- NULL }
