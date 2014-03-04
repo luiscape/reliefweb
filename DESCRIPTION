@@ -1,0 +1,16 @@
+Package: reliefweb
+Title: A package to make Reliefweb.int data easy for statistical analysis.
+Version: 0.1
+Authors.R: "Luis Capelo <capelo@un.org> [aut, cre]"
+Description: reliefweb allows the user to create tailored queries to the
+ Reliefweb API and download the resulting data into a data.frame, making its
+ subsequent analysis easier. It cleans the data leaving only relevant fields
+ and standardizes dates.
+Depends: 
+ R (>= 3.0.2),
+ jsonlite,
+ RCurl (>= 1.95-4.1),
+ lubridate (>= 1.3.3)
+License: GPL v3
+LazyData: true
+Suggests: testthat

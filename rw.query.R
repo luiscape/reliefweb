@@ -12,22 +12,27 @@
 
 rw.query <- function(type = c("report", "job"), # These are the only two options available.
                      limit = c(1:1000, "all"), # 'all' means retreive all metadata from a certain query.
-                     country = "Syria",
+                     country = c("NA", "all"),
                      field1 = "NA",
                      field2 = "NA",
                      field3 = "NA",
                      field4 = "NA",
                      field5 = "NA",
-                     debug = FALSE) {
+                     debug = FALSE, 
+                     csv = FALSE) {
 
   require(jsonlite) # for reading the resulting JSON file.
   require(RCurl) # for making HTTP requests.
   require(lubridate) # for working with dates.
 
+  country.url <- c("&query[value]=country:")
+  
   # If a limit isn't established, then it is emplied that we'll get all the data.
-  if (limit == 'NULL') { limit <- c(1000) }
+  if (limit == NULL) { limit <- c(1000) }
   if (limit == "all") { limit <- c(1000) }
-
+  if (country == "all") { country <- NULL 
+                          country.url <- NULL } 
+  
   # This URL is the base-URL for acquiring data.
   base.url <- paste("http://api.rwlabs.org/v0/",
                     type,
@@ -51,13 +56,13 @@ rw.query <- function(type = c("report", "job"), # These are the only two options
   if (field5 != "NA") { query.url <- paste(query.url,"&fields[include][4]=", field5, sep = "") }
 
   url <- paste(base.url, query.url,
-               "&query[value]=country:",
+               country.url,
                country,
                "&sort[0]=date.created:desc",
                sep = "")
 
   c.url <- paste(count.url,
-                 "&query[value]=country:",
+                 country.url,
                  country,
                  "&sort[0]=date.created:desc",
                  sep = "")
@@ -123,9 +128,9 @@ rw.query <- function(type = c("report", "job"), # These are the only two options
 
 
   # Creating a metadata data.frame.
-  if (debug != TRUE) {
+  if (csv == TRUE) {
     meta.data <- query[1, 1:7]
-    write.csv(meta.data, file = "data/metadata.csv", row.names = FALSE)
+    write.csv(meta.data, file = paste("data/", ifelse(country == "all", "all", country), "-", type, "-metadata.csv", sep = ""), row.names = FALSE)
   }
 
   if (debug == TRUE) {
@@ -169,7 +174,6 @@ rw.query <- function(type = c("report", "job"), # These are the only two options
           x <- rw.fields(df = x)
 
           final <- rbind(final, x)
-      }
       close(pb)
     return(final)
   }
@@ -196,10 +200,12 @@ query <- rw.it(df = query)
 
   query <- rw.clean.dates(df = query)
 
-  # Cleaning useless columns.
-    x <- query[8]
-    y <- query[10:ncol(query) - 1]
-  query <- cbind(x,y)
+# #   # Cleaning useless columns.
+# if (country != "all") {
+#     x <- query[8]
+#     y <- query[10:ncol(query) - 1]
+#   query <- cbind(x,y)
+# }
 
   # Cleaning duplicate entries.
   rw.clean.duplicates <- function(df = "NA") {
@@ -211,10 +217,14 @@ query <- rw.it(df = query)
 
   query <- rw.clean.duplicates(query)
 
-  query$country <- country
+  query$country <- ifelse(country == "all", "All countries in Reliefweb.", country)
 
-# Storing the resulting data in a CSV file.
-  write.csv(query, file = paste("data/", country, "-", type, ".csv", sep = ""))
+  
+  # Storing the resulting data in a CSV file. 
+  if (csv == TRUE) {
+    write.csv(query, file = paste("data/", ifelse(country == "all", "all", country), "-", type, ".csv", sep = ""))
+  }
+  print("Done.")
 
   return(query)
 }
