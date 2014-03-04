@@ -5,20 +5,22 @@
 # This work relies on ReliefWeb's API (which is still in aplha).
 # The documentation for the API is available at http://apidoc.rwlabs.org/
 #
-#  Version:  0.1
+#  Version:  0.1.1
 #
 #  Author: Luis Capelo | capelo@un.org | @luiscape
 
 
 rw.query <- function(type = c("report", "job"), # These are the only two options available.
                      limit = c(1:1000, "all"), # 'all' means retreive all metadata from a certain query.
-                     country = c("NA", "all"),
+                     country = c("NA", "all"), # 'all' fetches data from the whole database.
                      field1 = "NA",
                      field2 = "NA",
                      field3 = "NA",
                      field4 = "NA",
                      field5 = "NA",
-                     debug = FALSE, 
+                     from = "NA",
+                     to = "NA",
+                     debug = FALSE,
                      csv = FALSE) {
 
   require(jsonlite) # for reading the resulting JSON file.
@@ -26,13 +28,13 @@ rw.query <- function(type = c("report", "job"), # These are the only two options
   require(lubridate) # for working with dates.
 
   country.url <- c("&query[value]=country:")
-  
+
   # If a limit isn't established, then it is emplied that we'll get all the data.
-  if (limit == NULL) { limit <- c(1000) }
+  if (is.null(limit) == TRUE) { limit <- c(1000) }
   if (limit == "all") { limit <- c(1000) }
-  if (country == "all") { country <- NULL 
-                          country.url <- NULL } 
-  
+  if (country == "all") { country <- NULL
+                          country.url <- NULL }
+
   # This URL is the base-URL for acquiring data.
   base.url <- paste("http://api.rwlabs.org/v0/",
                     type,
@@ -82,7 +84,7 @@ rw.query <- function(type = c("report", "job"), # These are the only two options
 
   ### Fetching the data. ###
   if (debug == TRUE) {
-    x <- paste("The number of fields being fetched is: ", url, sep = "")
+    x <- paste("The URL being queried is: ", url, sep = "")
     print(x)
   }
 
@@ -91,17 +93,12 @@ rw.query <- function(type = c("report", "job"), # These are the only two options
   # Function to convert the nested lists into rows in the data.frame.
   rw.fields <- function(df = "NA") {
 
-    # Counting the number of fields. Will work better with regex.
+    # Counting the number of fields. (Will work better with regex.)
     if (field1 != "NA") { a <- 1 }
     if (field2 != "NA") { a <- 2 }
     if (field3 != "NA") { a <- 3 }
     if (field4 != "NA") { a <- 4 }
     if (field5 != "NA") { a <- 5 }
-
-    if (debug == TRUE) {
-      x <- paste("This is how many fields we have: ", a, sep = "")
-      print(x)
-    }
 
     for (i in 1:a) {
         if (i == 1) { field <- field1 }
@@ -110,15 +107,15 @@ rw.query <- function(type = c("report", "job"), # These are the only two options
         if (i == 4) { field <- field4 }
         if (i == 5) { field <- field5 }
 
-        if (debug == TRUE ) {
-         if (i == 1) { print('And they are:') }
-         print(field)
-        }
+        ### Problem ###
+        # There is an issue here with the kind of fields the user queries. 
+        # The solution below isn't sustainable. 
         
-        # I am having a problem here where the dates are not being parsed correctly. 
-        x <- data.frame(as.list(df$data.list.fields[i]))
+        if (field == "date.created") { 
+          x <- data.frame(as.list(df$data.list.fields[i]))
+          return(x)
+        } else { x <- data.frame(list(df$data.list.fields[i])) }        
         df <- cbind(df, x)
-#         colnames(df)[ncol(df)] <- field # adding names is confusing due to the odd order fields show up. 
     }
     df$data.list.fields <- NULL
     return(df)
@@ -126,28 +123,20 @@ rw.query <- function(type = c("report", "job"), # These are the only two options
 
   query <- rw.fields(df = query)
 
-
   # Creating a metadata data.frame.
   if (csv == TRUE) {
     meta.data <- query[1, 1:7]
     write.csv(meta.data, file = paste("data/", ifelse(country == "all", "all", country), "-", type, "-metadata.csv", sep = ""), row.names = FALSE)
   }
-
-  if (debug == TRUE) {
-    print("The 'colnames' are:")
-    print(colnames(query))
-    y <- paste("The number of rows 'query' are: ", nrow(query), sep = "")
-    print(y)
-
-    print("this is the final date row.")
-    print(query$date.created[nrow(query)])
-  }
-
+  
+  # UI element. 
+  print(paste("Fetching ~", count, " records.", sep = ""))
+  
   # Creating iterations to go around the limits issue.
   rw.it <- function(df = "NA") {
       to <- df$created[nrow(df)]
       final <- df
-      
+
       # create progress bar
       total <- ceiling(count/limit)
       pb <- txtProgressBar(min = 0, max = total, style = 3)
@@ -158,15 +147,12 @@ rw.query <- function(type = c("report", "job"), # These are the only two options
         setTxtProgressBar(pb, i)
 
           to <- final$created[nrow(final)]
-
+          
           it.url <- paste(url, "&filter[field]=date.created&filter[value][to]=", format(to, scientific = FALSE), sep = "")
-
-        if (debug == TRUE) {
-          x <- paste("This is the iteration URL: ", it.url, sep = "")
-          print(x)
-      
-          y <- paste("And this is the iteration date: ", to, sep = "")
-          print(y)
+        
+        if (debug == TRUE) { 
+          print(paste("This is the it.url", it.url, sep = ""))
+          print(paste("From iteration number ", i, sep = ""))
         }
 
           x <- data.frame(fromJSON(getURLContent(it.url)))
@@ -174,12 +160,13 @@ rw.query <- function(type = c("report", "job"), # These are the only two options
           x <- rw.fields(df = x)
 
           final <- rbind(final, x)
+        }
       close(pb)
     return(final)
   }
 
-query <- rw.it(df = query)
-#   if (limit == "all") { query <- rw.it(df = query) } 
+   query <- rw.it(df = query)
+#  if (limit == "all") { query <- rw.it(df = query) } else
 
   ## Cleaning the data.
   rw.time <- function(df = "NA") {
@@ -217,7 +204,10 @@ query <- rw.it(df = query)
 
   query <- rw.clean.duplicates(query)
 
-  query$country <- ifelse(country == "all", "All countries in Reliefweb.", country)
+### Problem here adding a column with the all countries label. ### 
+#   country <- ifelse(country == "all", c("All countries in Reliefweb."), country)
+
+#   query$country <- country
 
   
   # Storing the resulting data in a CSV file. 
