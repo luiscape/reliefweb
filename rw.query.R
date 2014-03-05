@@ -31,23 +31,26 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
 
   # Adding the limit numbers and the country parameter.
   if (is.null(limit) == TRUE) { stop("Please provide the 'limit' parameter.") }
+  
+  # If 'all' countries are required it clears the 'country' query from the URL.
   if (country == "all") { country <- NULL
                           country.url <- NULL }
+  
 
   # Base-URL for acquiring data.
   base.url <- paste("http://api.rwlabs.org/v0/",
                     type,
                     "/list",
                     "?limit=",
-                    limit,
+                    ifelse(limit == "all", 1000, limit), # Handles the `all` case for the `limit` parameter. 
                     sep = "")
 
   # URL for acquiring the 'count' metadata.
   count.url <- paste("http://api.rwlabs.org/v0/",
                      type,
                      "/count",
-                     "?limit=",
-                     limit,
+                     "?limit=", 
+                     ifelse(limit == "all", 1000, limit), # Handles the `all` case for the `limit` parameter. 
                      sep = "")
 
   # Conditional statements for building the query URL. 
@@ -138,7 +141,7 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
   
   # Creating iterations to go around the 1000-limitation.
   rw.it <- function(df = "NA") {
-    if (limit == "all") { limit <- 1000 }
+    limit <- ifelse(limit == "all", 1000, limit)
       to <- df$created[nrow(df)]
       final <- df
 
@@ -166,6 +169,7 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
           x <- rw.fields(df = x)
 
           final <- rbind(final, x)
+        
         }
       close(pb)
     return(final)
