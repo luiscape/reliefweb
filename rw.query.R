@@ -31,11 +31,11 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
 
   # Adding the limit numbers and the country parameter.
   if (is.null(limit) == TRUE) { stop("Please provide the 'limit' parameter.") }
-  
+
   # If 'all' countries are required it clears the 'country' query from the URL.
   if (country == "all") { country <- NULL
                           country.url <- NULL }
-  
+
 
   # Base-URL for acquiring data.
   base.url <- paste("http://api.rwlabs.org/v0/",
@@ -88,7 +88,7 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
   count <- rw.count()
   count <- count$count
 
-  
+
   #### Fetching the data. ####
   if (debug == TRUE) {
     x <- paste("The URL being queried is: ", url, sep = "")
@@ -101,7 +101,7 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
   # Function to convert the nested lists into rows in the data.frame.
   rw.fields <- function(df = "NA") {
 
-    # Counting the number of fields. 
+    # Counting the number of fields.
     # (Note: should work better with regex.)
     if (is.null(field1) == FALSE) { n.field <- 1 }
     if (is.null(field2) == FALSE) { n.field <- 2 }
@@ -117,10 +117,10 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
         if (i == 5) { field <- field5 }
 
         ### Problem ###
-        # There is an issue here with the kind of fields the user queries. 
+        # There is an issue here with the kind of fields the user queries.
         # Nested fields break the function.
-        # The solution below doesn't address the issue and only works with non-nested items. 
-        
+        # The solution below doesn't address the issue and only works with non-nested items.
+
         x <- data.frame(as.list(df$data.list.fields[i]))
         df <- cbind(df, x)
     }
@@ -135,10 +135,10 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
     meta.data <- query[1, 1:7]
     write.csv(meta.data, file = paste("data/", ifelse(country == "all", "all", country), "-", type, "-metadata.csv", sep = ""), row.names = FALSE)
   }
-  
-  # UI element. 
+
+  # UI element.
   print(paste("Fetching ~", ifelse(limit == "all", count, limit), " records.", sep = ""))
-  
+
   # Creating iterations to go around the 1000-limitation.
   rw.it <- function(df = "NA") {
     limit <- ifelse(limit == "all", 1000, limit)
@@ -151,15 +151,15 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
 
       for (i in 2:total) {
         Sys.sleep(0.1)
-        
+
         # Update progress bar.
         setTxtProgressBar(pb, i)
 
           to <- final$created[nrow(final)]
-          
+
           it.url <- paste(url, "&filter[field]=date.created&filter[value][to]=", format(to, scientific = FALSE), sep = "")
-        
-        if (debug == TRUE) { 
+
+        if (debug == TRUE) {
           print(paste("This is the it.url", it.url, sep = ""))
           print(paste("From iteration number ", i, sep = ""))
         }
@@ -169,7 +169,7 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
           x <- rw.fields(df = x)
 
           final <- rbind(final, x)
-        
+
         }
       close(pb)
     return(final)
@@ -177,11 +177,11 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
 
 #    query <- rw.it(df = query)
 
-  # Only run iterator if we are fetching "all" entries. 
+  # Only run iterator if we are fetching "all" entries.
   # Note: improve to be more > 1000.
   if (limit == "all") { query <- rw.it(df = query) }
-  
-  
+
+
   #### Cleaning the resulting data. ####
 
   # Transform dates from Epoch to year-month-day.
@@ -191,10 +191,10 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
     return(df)
   }
 
-  query <- rw.time(df = query) 
+  query <- rw.time(df = query)
 
-  # Can't remember what this function is for. 
-  # Cleaning the dates. 
+  # Can't remember what this function is for.
+  # Cleaning the dates.
   rw.clean.dates <- function (df = "NA") {
       x <- ymd(df$created) < ymd('2014-01-30')
       df <- cbind(df, x)
@@ -203,8 +203,8 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
   }
 
 #   query <- rw.clean.dates(df = query)
-  
-#   print(n.field)  # Will have to re-create the check fields function here. 
+
+#   print(n.field)  # Will have to re-create the check fields function here.
 
   # Cleaning useless columns.
 #   query <- cbind(query$data.list.id,query$field1,)
@@ -220,20 +220,20 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
 
   query <- rw.clean.duplicates(query)
 
-  ### Problem here adding a column with the all countries label. ### 
+  ### Problem here adding a column with the all countries label. ###
   country <- ifelse(is.null(country) == TRUE, "All", country)
   query$country <- country
 
-  # Keeping only the columns of interest. 
+  # Keeping only the columns of interest.
   x <- query[8] # data.list.id
   y <- query[10:ncol(query)] # the fetched fields.
   query <- cbind(x, y)
-                
-  # Storing the resulting data in a CSV file. 
+
+  # Storing the resulting data in a CSV file.
   if (csv == TRUE) {
     write.csv(query, file = paste("data/", ifelse(country == "all", "all", country), "-", type, ".csv", sep = ""))
   }
-  
+
   print("Done.")
   return(query)
 }
