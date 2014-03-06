@@ -150,7 +150,6 @@ rw.query <- function(type = NULL,  # These are the only two options available: "
       pb <- txtProgressBar(min = 0, max = total, style = 3)
 
       for (i in 2:total) {
-        Sys.sleep(0.1)
 
         # Update progress bar.
         setTxtProgressBar(pb, i)
