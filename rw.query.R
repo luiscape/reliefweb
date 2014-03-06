@@ -10,7 +10,7 @@
 #  Author: Luis Capelo | capelo@un.org | @luiscape
 
 
-rw.query <- function(type = c("report", "job"),  # These are the only two options available.
+rw.query <- function(type = NULL,  # These are the only two options available: "report" and "job".
                      limit = NULL,  # Can be a number from 1 to 1000 or "all".
                      country = NULL,  # Queries a particular country (or a list of countries). 'all' queries all countries. 
                      field1 = NULL,
@@ -18,14 +18,14 @@ rw.query <- function(type = c("report", "job"),  # These are the only two option
                      field3 = NULL,
                      field4 = NULL,
                      field5 = NULL,
-                     from = NULL,
-                     to = NULL,
-                     debug = FALSE,
-                     csv = FALSE) {
+                     from = NULL,  # Parameter not implemented.
+                     to = NULL,  # Parameter not implemented.
+                     debug = FALSE,  # Prints debug and system warnings.
+                     csv = FALSE) {  # Stores the resulting data.frame in a standard CSV file together with a metadata file.
 
-  require(jsonlite) # for reading the resulting JSON file.
-  require(RCurl) # for making HTTP requests.
-  require(lubridate) # for working with dates.
+  require(jsonlite)  # for reading the resulting JSON file.
+  require(RCurl)  # for making HTTP requests.
+  require(lubridate)  # for working with dates.
 
   country.url <- c("&query[value]=country:")
 
