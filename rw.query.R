@@ -12,7 +12,7 @@
 
 rw.query <- function(type = NULL,  # These are the only two options available: "report" and "job".
                      limit = NULL,  # Can be a number from 1 to 1000 or "all".
-                     country = NULL,  # Queries a particular country (or a list of countries). 'all' queries all countries. 
+                     country = NULL,  # Queries a particular country (or a list). 'all' queries all countries. 
                      field1 = NULL,
                      field2 = NULL,
                      field3 = NULL,
