@@ -6,6 +6,7 @@
 # The documentation for the API is available at http://apidoc.rwlabs.org/
 #
 #  Version:  0.1.1
+#  This is the training version. 
 #
 #  Author: Luis Capelo | capelo@un.org | @luiscape
 
