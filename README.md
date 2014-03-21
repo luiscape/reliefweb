@@ -58,8 +58,8 @@ Roadmap
 1. Release first compiled version (0.1) using `dev-tools`.
 2. Create a `codebook` for the API.
 3. Finish the first version of the `rw.plot` function. 
-4. Write the article `Introducing Reliefweb as a real-time source of data`. 
-5. Host and run the package on a web server. 
+4. Host and run the package on ScraperWiki.
+5. Write the article `Introducing Reliefweb as a real-time source of data`. 
 6. Create a User Interface for the querier. 
 
 
