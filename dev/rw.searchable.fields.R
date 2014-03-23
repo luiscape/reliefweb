@@ -1,0 +1,103 @@
+#### Searcheable Fields. #### 
+
+#' Searcheable Fields
+#' 
+#' This function provides the list of saercheable fields in the Reliefweb platform.
+#' The function doesn't take any paramenters -- it is a list of what can be searched and what can't.
+
+rw.searcheable.fields <- function(x) { 
+  
+  
+  
+  # Searchable fields. 
+  id
+  title
+  body
+  origin
+  
+  date
+  date.created
+  date.changed
+  date.original
+  
+  headline
+  headline.title
+  headline.summary
+  headline.image
+  headline.image.id
+  
+  headline.image.caption
+  headline.image.copyright
+  
+  language
+  language.id
+  language.name
+  language.code
+  
+  primary_country
+  primary_country.id
+  primary_country.name
+  primary_country.shortname
+  primary_country.iso3
+  
+  country.id
+  country.name
+  country.shortname
+  country.iso3
+  
+  source
+  source.id
+  source.name
+  source.shortname
+  source.longname
+  source.homepage
+  source.type
+  source.type.id
+  source.type.name
+  
+  format
+  format.id
+  format.name
+  
+  theme
+  theme.id
+  theme.name
+  
+  disaster
+  disaster.id
+  disaster.name
+  disaster.glide
+  disaster.type
+  disaster.type.id
+  disaster.type.name
+  
+  disaster_type
+  disaster_type.id
+  disaster_type.name
+  
+  vulnerable_groups
+  vulnerable_groups.id
+  vulnerable_groups.name
+  
+  ocha_product
+  ocha_product.id
+  ocha_product.name
+  
+  image
+  image.id
+  image.mimetype
+  image.filename
+  image.caption
+  image.copyright
+  image.url
+  
+  file
+  file.id
+  file.mimetype
+  file.filename
+  file.description
+  file.url
+  file.preview
+  file.preview.url
+  
+}

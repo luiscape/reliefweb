@@ -9,25 +9,44 @@
 #
 #  Author: Luis Capelo | capelo@un.org | @luiscape
 
+#' @param entity = report, job, training, disaster or country
+#' @param query = open query field.
+#' @param limit = it can be any number between 1 and 1000 or 'all'. If all, the result will be all of the query.
+#' @param country = to specify a query about a country. 
+#' @param from = from a certain date. The date has to be in the YYYY-MM-DD format. 
+#' @param to = to a certain date.The date has to be in the YYYY-MM-DD format. 
+#' @param debug = for entering the debugging mode. This prints a number of statements making easier to debug.
+#' @param csv = if TRUE will store two CVS viles: one with the resulting data.frame from the query and a metadata file.
+#' @param fields = what fields should appear. 
 
-rw.query <- function(type = NULL,  # These are the only two options available: "report" and "job".
+
+rw.query <- function(entity = NULL,  # Any of the entities available: report, job, training, disaster or country.
                      limit = NULL,  # Can be a number from 1 to 1000 or "all".
+                     query = NULL,  # Open query field.
+                     value = NULL,  # Provide the value of the query.
                      country = NULL,  # Queries a particular country (or a list). 'all' queries all countries. 
-                     field1 = NULL,
-                     field2 = NULL,
-                     field3 = NULL,
-                     field4 = NULL,
-                     field5 = NULL,
+                     fields = NULL,  # What fields should the query return.
                      from = NULL,  # Parameter not implemented.
                      to = NULL,  # Parameter not implemented.
                      debug = FALSE,  # Prints debug and system warnings.
                      csv = FALSE) {  # Stores the resulting data.frame in a standard CSV file together with a metadata file.
 
+  # Loading dependencies.
   require(jsonlite)  # for reading the resulting JSON file.
   require(RCurl)  # for making HTTP requests.
   require(lubridate)  # for working with dates.
+  
+  source('rw.searcheable.fields.R')  # For checking the query terms against a list.
 
-  country.url <- c("&query[value]=country:")
+  # The query URL piece.
+  if (is.null(query) == TRUE) { stop("You have to provide something to query. 
+                                     If you simply want all the database use 'all'.") }
+  
+  if (is.null(query) == FALSE) { query.url <- c("&query[value]=") }
+  if (query == 'all') { query.url <- c('') }
+  
+  # The country URL piece.
+  if (is.null(country) == FALSE) { country.url <- c("&query[value]=country:") }
 
   # Adding the limit numbers and the country parameter.
   if (is.null(limit) == TRUE) { stop("Please provide the 'limit' parameter.") }
@@ -39,7 +58,7 @@ rw.query <- function(type = NULL,  # These are the only two options available: "
 
   # Base-URL for acquiring data.
   base.url <- paste("http://api.rwlabs.org/v0/",
-                    type,
+                    entity,
                     "/list",
                     "?limit=",
                     ifelse(limit == "all", 1000, limit), # Handles the `all` case for the `limit` parameter. 
@@ -47,7 +66,7 @@ rw.query <- function(type = NULL,  # These are the only two options available: "
 
   # URL for acquiring the 'count' metadata.
   count.url <- paste("http://api.rwlabs.org/v0/",
-                     type,
+                     entity,
                      "/count",
                      "?limit=", 
                      ifelse(limit == "all", 1000, limit), # Handles the `all` case for the `limit` parameter. 
@@ -133,7 +152,7 @@ rw.query <- function(type = NULL,  # These are the only two options available: "
   # Creating a metadata data.frame.
   if (csv == TRUE) {
     meta.data <- query[1, 1:7]
-    write.csv(meta.data, file = paste("data/", ifelse(country == "all", "all", country), "-", type, "-metadata.csv", sep = ""), row.names = FALSE)
+    write.csv(meta.data, file = paste("data/", ifelse(country == "all", "all", country), "-", entity, "-metadata.csv", sep = ""), row.names = FALSE)
   }
 
   # UI element.
@@ -230,7 +249,7 @@ rw.query <- function(type = NULL,  # These are the only two options available: "
 
   # Storing the resulting data in a CSV file.
   if (csv == TRUE) {
-    write.csv(query, file = paste("data/", ifelse(country == "all", "all", country), "-", type, ".csv", sep = ""))
+    write.csv(query, file = paste("data/", ifelse(country == "all", "all", country), "-", entity, ".csv", sep = ""))
   }
 
   print("Done.")
