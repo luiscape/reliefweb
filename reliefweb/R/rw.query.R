@@ -5,19 +5,19 @@
 # This work relies on ReliefWeb's API (which is still in aplha).
 # The documentation for the API is available at http://apidoc.rwlabs.org/
 #
-#  Version:  0.1.1
+#  Version:  0.1.3
 #
 #  Author: Luis Capelo | capelo@un.org | @luiscape
 
 #' @param entity = report, job, training, disaster or country
 #' @param query = open query field.
 #' @param limit = it can be any number between 1 and 1000 or 'all'. If all, the result will be all of the query.
-#' @param country = to specify a query about a country. 
-#' @param from = from a certain date. The date has to be in the YYYY-MM-DD format. 
-#' @param to = to a certain date.The date has to be in the YYYY-MM-DD format. 
+#' @param country = to specify a query about a country.
+#' @param from = from a certain date. The date has to be in the YYYY-MM-DD format.
+#' @param to = to a certain date.The date has to be in the YYYY-MM-DD format.
 #' @param debug = for entering the debugging mode. This prints a number of statements making easier to debug.
 #' @param csv = if TRUE will store two CVS viles: one with the resulting data.frame from the query and a metadata file.
-#' @param fields = what fields should appear. 
+#' @param fields = what fields should appear.
 
 
 rw.query <- function(entity = NULL,  # Any of the entities available: report, job, training, disaster or country.
@@ -32,27 +32,41 @@ rw.query <- function(entity = NULL,  # Any of the entities available: report, jo
                      csv = FALSE) {  # Stores the resulting data.frame in a standard CSV file together with a metadata file.
 
   # Loading dependencies.
-  require(jsonlite)  # for reading the resulting JSON file.
-  require(RCurl)  # for making HTTP requests.
-  require(lubridate)  # for working with dates.
-  
+  require(jsonlite)  # For reading the resulting JSON file.
+  require(RCurl)  # For making HTTP requests.
+  require(lubridate)  # For working with dates.
+
   source('rw.searcheable.fields.R')  # For checking the query field against a list of the searcheable fields.
-  
-  # For open text field.
-  if (is.null(text.query) == FALSE) { 
-      text.query.url <- c(paste("&query[value]=", text.query, sep = ""))
-      warning('In this version searching the open text field will override whatever other field you have 
+
+
+  #### Building the URL snippets and checking the validity of each parameter. ####
+  # For the entity parameter. Creating `entity.url`.
+  if (is.null(entity) == TRUE) { stop('Please provide an entity. At this point only the `report` entity is fully implemented.')}
+  if (is.null(entity) == FALSE) { entity.url <- paste(entity, '/info?', sep = "") }
+
+  # For open text parameter. Creating `text.query.url`.
+  if (is.null(text.query) == FALSE) {
+      text.query.url <- paste("query[value]=", text.query, sep = "")
+      warning('In this version searching the open text field will override whatever other field you have
               included the `query` paramenter. In further versions the open text field will allow you to
               further refine your search.')
   }
-  
-  # The conditions for the 'query' param.
-  if (is.null(query) == TRUE) { stop("You have to provide something to query.
-                                     If you simply want all the database use 'all'.") }  # If nothing is provided.
-  if (is.null(query) == FALSE) { query.url <- c("?query[value]=") }  # If something is provided, basic URL is added.
-  
-  if (query == 'all') { query.url <- c('') }  # If 'all' is provided.
-  
+
+  # The conditions for the 'query' param. Creating `query.url`.
+  # if (is.null(query) == TRUE) { warning("You can get all the database by the database using 'all'.") }
+  if (is.null(query) == FALSE) { query.field.url <- paste("query[value]=", query, sep = "") }  # If something is provided, basic URL is added.
+
+  # if (query == 'all') { query.url <- c('') }  # If 'all' is provided.
+
+  # Validity check for both query fields.
+  if (is.null(query) == TRUE && is.null(text.query) == TRUE) { stop("You have to either provide a `text.query' input or a `query` + `value` input.")}
+
+  ###################################
+  ###################################
+  ###### Stopped Working HERE! ######
+  ###################################
+  ###################################
+
   # The conditions for the 'value' param.
   if (is.null(value) == TRUE) { query.value <- paste(":", value) }
   if (is.null(value) == FALSE) { query.value <- c("&query[value]=country:") }
@@ -67,11 +81,12 @@ rw.query <- function(entity = NULL,  # Any of the entities available: report, jo
 
   # Base-URL for acquiring data.
   base.url <- paste("http://api.rwlabs.org/v0/",
-                    entity,
+                    entity.url,
                     "/list",
                     "?limit=",
                     ifelse(limit == "all", 1000, limit), # Handles the `all` case for the `limit` parameter. 
                     sep = "")
+
 
   # URL for acquiring the 'count' metadata.
   count.url <- paste("http://api.rwlabs.org/v0/",
