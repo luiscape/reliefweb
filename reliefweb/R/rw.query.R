@@ -9,6 +9,10 @@
 #
 #  Author: Luis Capelo | capelo@un.org | @luiscape
 
+#### Development Notes #### 
+# - Change the 'country' param for 'query'. And add the 'query-value' param.
+# - Change the 'fields' for the actual API params. 
+
 
 rw.query <- function(type = NULL,  # These are the only two options available: "report" and "job".
                      limit = NULL,  # Can be a number from 1 to 1000 or "all".

@@ -11,9 +11,8 @@
 
 
 #### Development Notes #### 
-# - Change the 'country' param for 'query'. 
+# - Change the 'country' param for 'query'. And add the 'query-value' param.
 # - Change the 'fields' for the actual API params. 
-# - 
 
 
 rw.query <- function(type = NULL,  # These are the only two options available: "report" and "job".
