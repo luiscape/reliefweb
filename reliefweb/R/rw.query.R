@@ -22,9 +22,9 @@
 
 rw.query <- function(entity = NULL,  # Any of the entities available: report, job, training, disaster or country.
                      limit = NULL,  # Can be a number from 1 to 1000 or "all".
-                     query = NULL,  # Open query field.
+                     text.query = NULL,  # Open query field.
+                     query = NULL,  # Query using the standard fields. Check the URL-XXXX.
                      value = NULL,  # Provide the value of the query.
-                     country = NULL,  # Queries a particular country (or a list). 'all' queries all countries. 
                      fields = NULL,  # What fields should the query return.
                      from = NULL,  # Parameter not implemented.
                      to = NULL,  # Parameter not implemented.
@@ -36,17 +36,26 @@ rw.query <- function(entity = NULL,  # Any of the entities available: report, jo
   require(RCurl)  # for making HTTP requests.
   require(lubridate)  # for working with dates.
   
-  source('rw.searcheable.fields.R')  # For checking the query terms against a list.
-
-  # The query URL piece.
-  if (is.null(query) == TRUE) { stop("You have to provide something to query. 
-                                     If you simply want all the database use 'all'.") }
+  source('rw.searcheable.fields.R')  # For checking the query field against a list of the searcheable fields.
   
-  if (is.null(query) == FALSE) { query.url <- c("&query[value]=") }
-  if (query == 'all') { query.url <- c('') }
+  # For open text field.
+  if (is.null(text.query) == FALSE) { 
+      text.query.url <- c(paste("&query[value]=", text.query, sep = ""))
+      warning('In this version searching the open text field will override whatever other field you have 
+              included the `query` paramenter. In further versions the open text field will allow you to
+              further refine your search.')
+  }
   
-  # The country URL piece.
-  if (is.null(country) == FALSE) { country.url <- c("&query[value]=country:") }
+  # The conditions for the 'query' param.
+  if (is.null(query) == TRUE) { stop("You have to provide something to query.
+                                     If you simply want all the database use 'all'.") }  # If nothing is provided.
+  if (is.null(query) == FALSE) { query.url <- c("?query[value]=") }  # If something is provided, basic URL is added.
+  
+  if (query == 'all') { query.url <- c('') }  # If 'all' is provided.
+  
+  # The conditions for the 'value' param.
+  if (is.null(value) == TRUE) { query.value <- paste(":", value) }
+  if (is.null(value) == FALSE) { query.value <- c("&query[value]=country:") }
 
   # Adding the limit numbers and the country parameter.
   if (is.null(limit) == TRUE) { stop("Please provide the 'limit' parameter.") }
