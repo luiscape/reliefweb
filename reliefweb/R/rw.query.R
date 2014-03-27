@@ -9,23 +9,25 @@
 #
 #  Author: Luis Capelo | capelo@un.org | @luiscape
 
-#' @param entity = report, job, training, disaster or country
-#' @param query = open query field.
-#' @param limit = it can be any number between 1 and 1000 or 'all'. If all, the result will be all of the query.
+#' @param entity = report, job, training, disaster or country. In this version only 'report' is available.
+#' @param query.field = single field to be queried. Run rw.query.fields() for a list of fields that can be queried.
+#' @param query.field.value = the value of the field.
+#' @param add.fields = what fields should be returned in the query. date.created comes in all queries.
+#' @param limit = it can be any number between 1 and 1000 or 'all'. If all, the result will be all of the query. The default is 10.
 #' @param country = to specify a query about a country.
-#' @param from = from a certain date. The date has to be in the YYYY-MM-DD format.
-#' @param to = to a certain date.The date has to be in the YYYY-MM-DD format.
+#' @param from = from a certain date. The date has to be in the YYYY-MM-DD format. NOT IMPLEMENTED YET. 
+#' @param to = to a certain date.The date has to be in the YYYY-MM-DD format. NOT IMPLEMENTED YET.
 #' @param debug = for entering the debugging mode. This prints a number of statements making easier to debug.
 #' @param csv = if TRUE will store two CVS viles: one with the resulting data.frame from the query and a metadata file.
 #' @param fields = what fields should appear.
 
 
-rw.query <- function(entity = NULL,  # Any of the entities available: report, job, training, disaster or country.
-                     limit = NULL,  # Can be a number from 1 to 1000 or "all".
+rw.query <- function(entity = NULL,  # Any of the entities available: report, job, training, disaster or country.  (For now only 'report' is available.)
+                     limit = NULL,  # Can be a number from 1 to 1000 or "all". The default is 10.
                      text.query = NULL,  # Open query field.
-                     query = NULL,  # Query using the standard fields. Check the URL-XXXX.
-                     value = NULL,  # Provide the value of the query.
-                     fields = NULL,  # What fields should the query return.
+                     query.field = NULL,  # Query using the standard fields. Only one field can be queried at a time.
+                     query.field.value = NULL,  # Provide the value of the query.
+                     add.fields = NULL,  # What fields should the query return. date.created is a default field due to sorting.
                      from = NULL,  # Parameter not implemented.
                      to = NULL,  # Parameter not implemented.
                      debug = FALSE,  # Prints debug and system warnings.
@@ -36,110 +38,88 @@ rw.query <- function(entity = NULL,  # Any of the entities available: report, jo
   require(RCurl)  # For making HTTP requests.
   require(lubridate)  # For working with dates.
 
+  
+  #### Validation tests. ####
+  # The validation tests before are useful for helping the user make a 
+  # right query and understand why his query isn't working. 
+  
   source('rw.searcheable.fields.R')  # For checking the query field against a list of the searcheable fields.
+  rw.searcheable.fields(l = query.field, debug = debug)  # Running the validator above.
+  if (is.null(query.field) == TRUE && is.null(text.query) == TRUE) { stop("You have to either provide a `text.query' input or a `query.field` + `query.field.value` input.") }
+  if (is.null(query.field) == FALSE && is.null(query.field.value) == TRUE) { stop("Please provide a value with a query field.") }
+  if (length(query.field) > 1) { stop('Please provide only one query field. Run rw.query.fields() if you are in doubt.') }
+  if (is.null(limit) == FALSE && limit < 0) { stop('Please provide an integer between 1 and 1000.') }
+  if (is.null(limit) == FALSE && limit > 1000) { stop('Please provide an integer between 1 and 1000.') }  # Increase the upper limit of the function.
+  query.field <- tolower(query.field)  # In case user inputs in high case.
 
 
+  
   #### Building the URL snippets and checking the validity of each parameter. ####
-  # For the entity parameter. Creating `entity.url`.
-  if (is.null(entity) == TRUE) { stop('Please provide an entity. At this point only the `report` entity is fully implemented.')}
-  if (is.null(entity) == FALSE) { entity.url <- paste(entity, '/info?', sep = "") }
-
-  # For open text parameter. Creating `text.query.url`.
+  # Here we are building the query.url, param-by-param.
+  
+  if (is.null(entity) == TRUE) { stop('Please provide an entity. At this point only the `report` entity is fully implemented.') }
+  if (is.null(entity) == FALSE) { entity.url <- entity }
+  if (is.null(limit) == TRUE) { limit.url <- paste("?limit=", 10, sep = "")
+                                warning("The default limit for this querier is 10. If you need more please provide a number using the 'limit' parameter.") }
+  if (is.null(limit) == FALSE) { limit.url <- paste("?limit=", limit, sep = "") }  
+  if (is.null(text.query) == TRUE) { text.query.url <- NULL }
   if (is.null(text.query) == FALSE) {
       text.query.url <- paste("query[value]=", text.query, sep = "")
-      warning('In this version searching the open text field will override whatever other field you have
-              included the `query` paramenter. In further versions the open text field will allow you to
-              further refine your search.')
+      warning('In this version searching the open text field will override whatever other field you have\nincluded the `query` paramenter. In further versions the open text field will allow you to\nfurther refine your search.')
   }
+  if (is.null(query.field) == FALSE) { query.field.url <- paste("query[value]=", query.field, ":", query.field.value, sep = "") }
+  
+  # Function for building the right query when more than one field is provided.
+  many.fields <- function(qf = NULL) { 
+    qf[length(qf) + 1] <- 'date.created'  # date.created is a default field due to sorting.
+    all.fields.url.list <- list()
+    for (i in 0:(length(qf) - 1)) { 
+      field.url <- paste("fields[include][",i,"]=", qf[i + 1], sep = "")
+      all.fields.url.list[i + 1] <- paste("&", field.url, sep = "")
+    }
+  all.fields.url <- paste(all.fields.url.list, collapse = "")
+  return(all.fields.url)
+  }
+  
+  if (is.null(add.fields) == FALSE) { add.fields.url <- many.fields(qf = add.fields) }
+#   if (is.null(from) == TRUE) {}  ## Implement in future versions.
+#   if (is.null(to) == TRUE) {}  ## Implement in future versions.
 
-  # The conditions for the 'query' param. Creating `query.url`.
-  # if (is.null(query) == TRUE) { warning("You can get all the database by the database using 'all'.") }
-  if (is.null(query) == FALSE) { query.field.url <- paste("query[value]=", query, sep = "") }  # If something is provided, basic URL is added.
-
-  # if (query == 'all') { query.url <- c('') }  # If 'all' is provided.
-
-  # Validity check for both query fields.
-  if (is.null(query) == TRUE && is.null(text.query) == TRUE) { stop("You have to either provide a `text.query' input or a `query` + `value` input.")}
-
-  ###################################
-  ###################################
-  ###### Stopped Working HERE! ######
-  ###################################
-  ###################################
-
-  # The conditions for the 'value' param.
-  if (is.null(value) == TRUE) { query.value <- paste(":", value) }
-  if (is.null(value) == FALSE) { query.value <- c("&query[value]=country:") }
-
-  # Adding the limit numbers and the country parameter.
-  if (is.null(limit) == TRUE) { stop("Please provide the 'limit' parameter.") }
-
-  # If 'all' countries are required it clears the 'country' query from the URL.
-  if (country == "all") { country <- NULL
-                          country.url <- NULL }
-
-
-  # Base-URL for acquiring data.
-  base.url <- paste("http://api.rwlabs.org/v0/",
+  
+  ## Building URL for aquiring data. ##
+  api.url <- "http://api.rwlabs.org/v0/"
+  query.url <- paste(api.url,  # it was base.url
                     entity.url,
-                    "/list",
-                    "?limit=",
-                    ifelse(limit == "all", 1000, limit), # Handles the `all` case for the `limit` parameter. 
+                    limit.url,
+                    query.field.url,
+                    add.fields.url,
+                    "&sort[0]=date.created:desc",
                     sep = "")
 
 
-  # URL for acquiring the 'count' metadata.
-  count.url <- paste("http://api.rwlabs.org/v0/",
-                     entity,
-                     "/count",
-                     "?limit=", 
-                     ifelse(limit == "all", 1000, limit), # Handles the `all` case for the `limit` parameter. 
-                     sep = "")
+#   # 
+#   url <- paste(base.url, query.url,
+#                country.url,
+#                country,
+#                
+#                sep = "")
 
-  # Conditional statements for building the query URL. 
-  if (is.null(field1) == FALSE) { query.url <- paste("&fields[include][0]=", field1, sep = "") }
-  if (is.null(field2) == FALSE) { query.url <- paste(query.url,"&fields[include][1]=", field2, sep = "") }
-  if (is.null(field3) == FALSE) { query.url <- paste(query.url,"&fields[include][2]=", field3, sep = "") }
-  if (is.null(field4) == FALSE) { query.url <- paste(query.url,"&fields[include][3]=", field4, sep = "") }
-  if (is.null(field5) == FALSE) { query.url <- paste(query.url,"&fields[include][4]=", field5, sep = "") }
 
-  # Query URL.
-  url <- paste(base.url, query.url,
-               country.url,
-               country,
-               "&sort[0]=date.created:desc",
-               sep = "")
 
-  # Count URL.
-  c.url <- paste(count.url,
-                 country.url,
-                 country,
-                 "&sort[0]=date.created:desc",
-                 sep = "")
-
-  # Here we count how many results a query generates. Later the count number will be used to calculate iterations.
-  rw.count <- function() {
-    sys.time <- as.data.frame(Sys.time())  # Getting the current time.
-    colnames(sys.time)[1] <- "sys.time"
-    count <- data.frame(fromJSON(getURLContent(c.url)))
-    count <- count$data.count  # Cleaning useless information.
-    x <- cbind(sys.time, count)
-    return(x)
-  }
-
-  # Running the function and keeping the data we want.
-  count <- rw.count()
-  count <- count$count
 
 
   #### Fetching the data. ####
   if (debug == TRUE) {
-    x <- paste("The URL being queried is: ", url, sep = "")
-    print(x)
+    x <- paste("The URL being queried is: ", query.url, sep = "")
+    warning(x)
   }
 
+  # Getting the count number for iterations later.
+  count <- data.frame(fromJSON(getURLContent(query.url)))
+  c.url <- count$data.total[1]
+
   # Using `jsonlite` and `RCurl` to fetch JSON from the URL.
-  query <- data.frame(fromJSON(getURLContent(url)))
+  query <- data.frame(fromJSON(getURLContent(query.url)))
 
   # Function to convert the nested lists into rows in the data.frame.
   rw.fields <- function(df = "NA") {
@@ -182,8 +162,8 @@ rw.query <- function(entity = NULL,  # Any of the entities available: report, jo
   # UI element.
   print(paste("Fetching ~", ifelse(limit == "all", count, limit), " records.", sep = ""))
 
-  # Creating iterations to go around the 1000-limitation.
-  rw.it <- function(df = "NA") {
+  # Creating iterations to go around the 1000-results limitation.
+  rw.it <- function(df = NULL) {
     limit <- ifelse(limit == "all", 1000, limit)
       to <- df$created[nrow(df)]
       final <- df
@@ -225,7 +205,6 @@ rw.query <- function(entity = NULL,  # Any of the entities available: report, jo
 
 
   #### Cleaning the resulting data. ####
-
   # Transform dates from Epoch to year-month-day.
   rw.time <- function(df = "NA") {
     df$created <- df$created/1000 # To eliminate the miliseconds.
@@ -235,18 +214,16 @@ rw.query <- function(entity = NULL,  # Any of the entities available: report, jo
 
   query <- rw.time(df = query)
 
-  # Can't remember what this function is for.
-  # Cleaning the dates.
-  rw.clean.dates <- function (df = "NA") {
-      x <- ymd(df$created) < ymd('2014-01-30')
-      df <- cbind(df, x)
-      x <- subset(df, df$x == 'TRUE')
-    return(x)
-  }
+#   # Can't remember what this function is for.
+#   # Cleaning the dates.
+#   rw.clean.dates <- function (df = "NA") {
+#       x <- ymd(df$created) < ymd('2014-01-30')
+#       df <- cbind(df, x)
+#       x <- subset(df, df$x == 'TRUE')
+#     return(x)
+#   }
 
 #   query <- rw.clean.dates(df = query)
-
-#   print(n.field)  # Will have to re-create the check fields function here.
 
   # Cleaning useless columns.
 #   query <- cbind(query$data.list.id,query$field1,)
@@ -273,7 +250,7 @@ rw.query <- function(entity = NULL,  # Any of the entities available: report, jo
 
   # Storing the resulting data in a CSV file.
   if (csv == TRUE) {
-    write.csv(query, file = paste("data/", ifelse(country == "all", "all", country), "-", entity, ".csv", sep = ""))
+    write.csv(query, file = paste(ifelse(country == "all", "all", country), "-", entity, ".csv", sep = ""))
   }
 
   print("Done.")
