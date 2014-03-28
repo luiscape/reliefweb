@@ -18,20 +18,20 @@
 #' @param from = from a certain date. The date has to be in the YYYY-MM-DD format. NOT IMPLEMENTED YET. 
 #' @param to = to a certain date.The date has to be in the YYYY-MM-DD format. NOT IMPLEMENTED YET.
 #' @param debug = for entering the debugging mode. This prints a number of statements making easier to debug.
-#' @param csv = if TRUE will store two CVS viles: one with the resulting data.frame from the query and a metadata file.
+#' @param csv = if TRUE will store two CVS files: one with the resulting data.frame from the query and a metadata file.
 #' @param fields = what fields should appear.
 
 
-rw.query <- function(entity = NULL,  # Any of the entities available: report, job, training, disaster or country.  (For now only 'report' is available.)
-                     limit = NULL,  # Can be a number from 1 to 1000 or "all". The default is 10.
-                     text.query = NULL,  # Open query field.
-                     query.field = NULL,  # Query using the standard fields. Only one field can be queried at a time.
-                     query.field.value = NULL,  # Provide the value of the query.
-                     add.fields = NULL,  # What fields should the query return. date.created is a default field due to sorting.
-                     from = NULL,  # Parameter not implemented.
-                     to = NULL,  # Parameter not implemented.
-                     debug = FALSE,  # Prints debug and system warnings.
-                     csv = FALSE) {  # Stores the resulting data.frame in a standard CSV file together with a metadata file.
+rw.query <- function(entity = NULL,
+                     limit = NULL,
+                     text.query = NULL,
+                     query.field = NULL,
+                     query.field.value = NULL,
+                     add.fields = NULL,
+                     from = NULL,
+                     to = NULL,
+                     debug = FALSE,
+                     csv = FALSE) {
 
   # Loading dependencies.
   require(jsonlite)  # For reading the resulting JSON file.
@@ -58,10 +58,10 @@ rw.query <- function(entity = NULL,  # Any of the entities available: report, jo
   # Here we are building the query.url, param-by-param.
   
   if (is.null(entity) == TRUE) { stop('Please provide an entity. At this point only the `report` entity is fully implemented.') }
-  if (is.null(entity) == FALSE) { entity.url <- entity }
-  if (is.null(limit) == TRUE) { limit.url <- paste("?limit=", 10, sep = "")
+  if (is.null(entity) == FALSE) { entity.url <- paste(entity, "/list", sep = "") }
+  if (is.null(limit) == TRUE) { limit.url <- paste("?limit=", 10, "&", sep = "")
                                 warning("The default limit for this querier is 10. If you need more please provide a number using the 'limit' parameter.") }
-  if (is.null(limit) == FALSE) { limit.url <- paste("?limit=", limit, sep = "") }  
+  if (is.null(limit) == FALSE) { limit.url <- paste("?limit=", limit, "&", sep = "") }  
   if (is.null(text.query) == TRUE) { text.query.url <- NULL }
   if (is.null(text.query) == FALSE) {
       text.query.url <- paste("query[value]=", text.query, sep = "")
@@ -71,7 +71,11 @@ rw.query <- function(entity = NULL,  # Any of the entities available: report, jo
   
   # Function for building the right query when more than one field is provided.
   many.fields <- function(qf = NULL) { 
-    qf[length(qf) + 1] <- 'date.created'  # date.created is a default field due to sorting.
+    
+    ifelse(all(is.na(match(qf, 'date.created')) == TRUE), qf[length(qf) + 1] <- 'date.created', '')
+    
+    # date.created is a default field due to sorting.
+    
     all.fields.url.list <- list()
     for (i in 0:(length(qf) - 1)) { 
       field.url <- paste("fields[include][",i,"]=", qf[i + 1], sep = "")
@@ -84,29 +88,16 @@ rw.query <- function(entity = NULL,  # Any of the entities available: report, jo
   if (is.null(add.fields) == FALSE) { add.fields.url <- many.fields(qf = add.fields) }
 #   if (is.null(from) == TRUE) {}  ## Implement in future versions.
 #   if (is.null(to) == TRUE) {}  ## Implement in future versions.
-
   
   ## Building URL for aquiring data. ##
   api.url <- "http://api.rwlabs.org/v0/"
-  query.url <- paste(api.url,  # it was base.url
+  query.url <- paste(api.url,
                     entity.url,
                     limit.url,
                     query.field.url,
                     add.fields.url,
                     "&sort[0]=date.created:desc",
                     sep = "")
-
-
-#   # 
-#   url <- paste(base.url, query.url,
-#                country.url,
-#                country,
-#                
-#                sep = "")
-
-
-
-
 
   #### Fetching the data. ####
   if (debug == TRUE) {
@@ -118,34 +109,32 @@ rw.query <- function(entity = NULL,  # Any of the entities available: report, jo
   count <- data.frame(fromJSON(getURLContent(query.url)))
   c.url <- count$data.total[1]
 
+
+  #### Enhancement #### 
+  # Here I am querying the url and getting a base data.frame. 
+  # It would probably be better to implement this process within the iteration bellow.
+  
   # Using `jsonlite` and `RCurl` to fetch JSON from the URL.
   query <- data.frame(fromJSON(getURLContent(query.url)))
 
+
+
+  ###################################
+  ###################################
+  ###### Stopped Working HERE! ######
+  ###################################
+  ###################################
+
+
   # Function to convert the nested lists into rows in the data.frame.
   rw.fields <- function(df = "NA") {
-
-    # Counting the number of fields.
-    # (Note: should work better with regex.)
-    if (is.null(field1) == FALSE) { n.field <- 1 }
-    if (is.null(field2) == FALSE) { n.field <- 2 }
-    if (is.null(field3) == FALSE) { n.field <- 3 }
-    if (is.null(field4) == FALSE) { n.field <- 4 }
-    if (is.null(field5) == FALSE) { n.field <- 5 }
-
-    for (i in 1:n.field) {
-        if (i == 1) { field <- field1 }
-        if (i == 2) { field <- field2 }
-        if (i == 3) { field <- field3 }
-        if (i == 4) { field <- field4 }
-        if (i == 5) { field <- field5 }
-
-        ### Problem ###
-        # There is an issue here with the kind of fields the user queries.
-        # Nested fields break the function.
-        # The solution below doesn't address the issue and only works with non-nested items.
-
-        x <- data.frame(as.list(df$data.list.fields[i]))
-        df <- cbind(df, x)
+  
+    for (i in 1:length(add.fields)) {
+#       field <- add.field[i]
+      if (length(df$data.list.fields[i]) > 1) { x <- paste(df$data.list.fields[i], collapse = ",") }
+      if (length(df$data.list.fields[i]) <= 1) { x <- data.frame(as.list(df$data.list.fields[i])) }
+        
+      df <- cbind(df, x)
     }
     df$data.list.fields <- NULL
     return(df)
