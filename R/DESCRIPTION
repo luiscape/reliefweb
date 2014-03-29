@@ -1,0 +1,19 @@
+Package: reliefweb
+Title: Bindings to query Reliefweb.int's API and prepare it for analysis.
+Version: 0.1.5
+Author: Luis Capelo <capelo@un.org>
+Maintainer: Luis Capelo <capelo@un.org>
+Description: The reliefweb package allows the user to create custom queries
+    to the Reliefweb API and download the resulting data into a data.frame,
+    making its subsequent analysis easier. It cleans the data (especially the
+    dates fields) and performs light transformations.
+URL: http://www.luiscapelo.info/reliefweb
+Depends:
+    R (>= 3.0.2),
+    jsonlite,
+    RCurl (>= 1.95-4.1),
+    lubridate (>= 1.3.3)
+License: GPL v3
+LazyData: true
+Suggests:
+    testthat
