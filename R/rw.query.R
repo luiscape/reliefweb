@@ -1,22 +1,35 @@
-#' Query the ReliefWeb database 
+#' ReliefWeb Querier
 #' 
 #' This function allows users to perform custom queries to the ReliefWeb database. 
 #' The results are a \code{data.frame} ready for analysis. The function works effectivelly 
-#' as a binding for the ReliefWeb API (http://api.rwlabs.org). Its documentation is
-#' available at http://apidocs.rwlabs.org
+#' as a binding for the ReliefWeb API (http://api.rwlabs.org). Documentation for the API
+#' can be found at http://apidocs.rwlabs.org. Detailed documentation about the package
+#' can be found at http://luiscapelo.info/reliefweb
 #' 
 #' 
 #' @param entity The entity can be the Reliefweb entities: "report", "job", "training", "disaster" or "country". In this version only the "support" entity has been tested.
 #' @param text.query Open text field. Any text can be inputed in this field. If this field is provided nor "query.field" neither "query.field.value" should be provided.
 #' @param query.field One of the single fields that can be queried in an entity. Run \code{rw.query.fields()} for a list of fields that can be queried.
-#' @param query.field.value the value of the field. The correct values depend on each field.
-#' @param add.fields what fields should be returned in the query. The field "date.created" is default and comes in all queries.
-#' @param limit it can be any number between 1 and 1000 or 'all'. If "all" is provided the result will return all the records that match that query in the ReliefWeb database. The default is 10.
-#' @param from from a certain date. The date has to be in the YYYY-MM-DD format. Not implemented yet. Will be implemented in future versions.
-#' @param to to a certain date.The date has to be in the YYYY-MM-DD format. Not implemented yet. Will be implemented in future versions.
-#' @param debug for entering the debugging mode.
-#' @param csv if TRUE will store two CVS files: one with the resulting data.frame from the query and a metadata file.
-
+#' @param query.field.value Specifies the value of the queried field. The correct values depend 
+#' on each field. For instance, the field 'primary_countr.iso3' requires a 3-letter ISO3 code such. 
+#' Syria, in that case, would be 'syr'. 
+#' @param add.fields Determine which fields should be returned in the query. The field "date.created" is default and comes in all queries.
+#' @param limit The number of results that the query should return. It can be any number between 
+#' 1 and 1000 or 'all'. If "all" is provided the result will return all the records that match 
+#' that query in the ReliefWeb database. The default is 10.
+#' @param from Limits the query from a certain date. The date has to be in the YYYY-MM-DD format. [Not implemented yet. Will be implemented in future versions.]
+#' @param to Limits the query up to a certain date. The date has to be in the YYYY-MM-DD format. [Not implemented yet. Will be implemented in future versions.]
+#' @param debug Parameter creater for debugging purposes.
+#' @param csv If TRUE will store two CVS files: one with the resulting data.frame from the query and a metadata file.
+#' @examples 
+#' # Here we are querying all the latest reposts about Syria using the field 'country'.
+#' # syria <- rw.query(entity = 'report', query.field = 'country', query.field.value = 'Syria', 
+#' # add.fields = c('id', 'title', 'date.created', 'primary_country.iso3')
+#' # Here we are using the open text parameter 'text.query' to query for 'Aleppo'.
+#' # aleppo <- rw.query(entity = 'report', text.query = 'Aleppo', add.fields = c('id', 'date.created',
+#' # 'title'))
+#'  
+#' # The result from both queries is a data.frame.
 
 rw.query <- function(entity = NULL,
                      limit = NULL,
@@ -28,23 +41,23 @@ rw.query <- function(entity = NULL,
                      to = NULL,
                      debug = FALSE,
                      csv = FALSE) {
-
-  # Loading dependencies.
-  require(jsonlite)  # For reading the resulting JSON file.
-  require(RCurl)  # For making HTTP requests.
-  require(lubridate)  # For working with dates.
-
   
   #### Validation tests. ####
   # The validation tests before are useful for helping the user make a 
   # right query and understand why his query isn't working. 
-  source('rw.searcheable.fields.R')  # For checking the query field against a list of the searcheable fields.
-  rw.searcheable.fields(l = query.field, debug = debug)  # Running the validator above.
+  
+  # Install depencency packages if not installed 
+  if ("lubridate" %in% rownames(installed.packages()) == FALSE) install.packages("lubridate")
+  if ("RCurl" %in% rownames(installed.packages()) == FALSE) install.packages("RCurl")
+  if ("jsonlite" %in% rownames(installed.packages()) == FALSE) install.packages("jsonlite")
+  
   if (is.null(query.field) == TRUE && is.null(text.query) == TRUE) { stop("You have to either provide a `text.query' input or a `query.field` + `query.field.value` input.") }
   if (is.null(query.field) == FALSE && is.null(query.field.value) == TRUE) { stop("Please provide a value with a query field.") }
   if (length(query.field) > 1) { stop('Please provide only one query field. Run rw.query.fields() if you are in doubt.') }
   if (is.null(limit) == FALSE && limit < 0 && tolower(limit) != "all") { stop('Please provide an integer between 1 and 1000 or all.') }
   if (is.null(limit) == FALSE && limit > 1000 && tolower(limit) != "all") { stop('Please provide an integer between 1 and 1000 or all.') }  # Increase the upper limit of the function.
+  if (is.null(limit) == FALSE) { limit <- tolower(limit) }
+  all <- "all"
 
   
   #### Building the URL snippets and checking the validity of each parameter. ####
@@ -55,7 +68,9 @@ rw.query <- function(entity = NULL,
   if (is.null(limit) == TRUE) { limit.url <- paste("?limit=", 10, "&", sep = "")
                                 warning("The default limit for this querier is 10. \nIf you need more please provide a number           using \nthe 'limit' parameter.") }
   
-  if (is.null(limit) == FALSE) { limit.url <- paste("?limit=", limit, "&", sep = "") }
+  if (is.null(limit) == FALSE) { limit.url <- paste("?limit=", 
+                                                    ifelse(limit == "all", 1000, limit),
+                                                    "&", sep = "") }
   if (is.null(text.query) == TRUE) { text.query.url <- NULL }
   if (is.null(text.query) == FALSE) {
       text.query.url <- paste("query[value]=", 
@@ -147,10 +162,10 @@ rw.query <- function(entity = NULL,
                                             entity, 
                                             "-metadata.csv", sep = ""), row.names = FALSE))}
 
+  
 
   # UI element.
-  print(paste("Fetching ~", ifelse(limit == "all", count, limit), " records.", sep = ""))
-
+  print(paste("Fetching ~", ifelse(is.null(limit) == TRUE, 10, ifelse(identical(limit,all) == TRUE, count, limit)), " records.", sep = ""))
   
   # Creating iterations to go around the 1000-results limitation.
   rw.it <- function(df = NULL) {
@@ -188,7 +203,7 @@ rw.query <- function(entity = NULL,
 
   # Only run iterator if we are fetching "all" entries.
   # Note: improve to be more > 1000, but not 'all'.
-  if (tolower(limit) == "all") { query <- rw.it(df = query) }
+  if (identical(limit,all) == TRUE) { query <- rw.it(df = query) }
 
   #### Cleaning the resulting data. ####
   # Transform dates from Epoch to year-month-day.
@@ -199,7 +214,10 @@ rw.query <- function(entity = NULL,
   }
 
   query <- rw.time(df = query)
-
+  
+  if (debug == TRUE) {
+    before.duplicates <- nrow(query)
+  }
 
   # Cleaning duplicate entries.
   rw.clean.duplicates <- function(df = "NA") {
@@ -210,15 +228,21 @@ rw.query <- function(entity = NULL,
   }
 
   query <- rw.clean.duplicates(query)
+  
+  
+  if (debug == TRUE) { 
+    # UI element     
+    after.duplicates <- nrow(query)
+    duplicates <- before.duplicates - after.duplicates
+    print(paste("There were ", duplicates, " duplicats in the query."))
+  }
 
   # Keeping only the columns of interest.
-#     x <- 
-#     y <-  # the fetched fields.
-  query <- cbind(query$data.list.id, query[,10:ncol(query)])
+  query <- query[,10:ncol(query)]
 
-  # Storing the resulting data in a CSV file.
+#   # Storing the resulting data in a CSV file. 
   if (csv == TRUE) {
-    write.csv(query, file = paste(ifelse(country == "all", "all", country), "-", entity, ".csv", sep = ""))
+    write.csv(query, file = "ReliefWeb-query", "-", entity, ".csv", sep = "")
   }
 
   print("Done.")

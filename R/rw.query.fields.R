@@ -3,7 +3,7 @@
 #' This function allows for the understanding of the query fields. It gives a list of the fields, together with 
 #' their description and basic metadata about them. 
 #' 
-#' @param field = provide a partial string of the field of interest. The results will contain all relevant fields.
+#' @param field provide a string of the field of interest. The results will contain all relevant fields.
 
 rw.query.fields <- function(field = NULL) {
   
