@@ -1,0 +1,2 @@
+export(rw.count.total)
+export(rw.query)

@@ -11,6 +11,9 @@
 #' 
 #' @param entity = Any of the entities available: "report", "job", "training", "disaster" or "country". 
 #' (It seems that only the 'report' entity is working properly.)
+#' 
+#' @export
+#' 
 #' @examples
 #' # Asking for the total number of reports currently available.
 #' # rw.count.total(entity = 'report')

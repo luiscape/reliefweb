@@ -21,6 +21,9 @@
 #' @param to Limits the query up to a certain date. The date has to be in the YYYY-MM-DD format. [Not implemented yet. Will be implemented in future versions.]
 #' @param debug Parameter creater for debugging purposes.
 #' @param csv If TRUE will store two CVS files: one with the resulting data.frame from the query and a metadata file.
+#' 
+#' @export
+#' 
 #' @examples 
 #' # Here we are querying all the latest reposts about Syria using the field 'country'.
 #' # syria <- rw.query(entity = 'report', query.field = 'country', query.field.value = 'Syria', 
