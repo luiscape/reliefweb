@@ -3,7 +3,6 @@ ReliefWeb R Package
 
 This _yet-to-be-package_ is designed to query ReliefWeb's upcoming API (still in __alpha__) for statistical analysis. It allows you to fetch all the data from a certain query, effectively overriding the 1000-results limitation. The result is an R `data.frame` ready for analysis.
 
-__Note:__ Version `0.1.3` will be released on Friday, March 28. Check the issues page to follow the current stage of development.
 
 
 Usage
@@ -57,7 +56,7 @@ ggplot(syria) +
 
 Roadmap
 -------
-1. Release first compiled version (0.1) using `dev-tools`.
+1. ~~Release first compiled version (0.1) using `dev-tools`.~~
 2. Create a `codebook` for the API.
 3. Finish the first version of the `rw.plot` function. 
 4. Host and run the package on ScraperWiki.
