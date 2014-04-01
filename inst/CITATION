@@ -1,0 +1,14 @@
+bibentry("Manual",
+         title = "The ReliefWeb Querier: querying, parsing, and acquiring  data from ReliefWeb.int",
+         author = person("Luis Capelo"),
+         organization = "United Nations Office for the Coordination of Humanitarian Affairs",
+         address      = "New York, USA",
+         year   = "2014",
+         url    = "http://www.luiscapelo.info/reliefweb",
+         
+         mheader = "To cite the ReliefWeb package in publications use:",
+         
+         mfooter = 
+           paste("For more information about the limitations of this package",
+                 "please refer to http://www.luiscapelo.info/reliefweb", sep = "")
+)
