@@ -3,7 +3,7 @@ ReliefWeb R Package
 
 This _yet-to-be-package_ is designed to query ReliefWeb's upcoming API (still in __alpha__) for statistical analysis. It allows you to fetch all the data from a certain query, effectively overriding the 1000-results limitation. The result is an R `data.frame` ready for analysis.
 
-__Note:__ Change the parameters from `fieldX` to the actual Reliefweb API parameters. For instance, use `primary_country.iso3` for that parameter instead of `fieldx = primary_country.iso3`. The former worked well for a simple API binding, but not so well for a properly working R function.
+__Note:__ Version `0.1.3` will be released on Friday, March 28. Check the issues page to follow the current stage of development.
 
 
 Usage
