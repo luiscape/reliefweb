@@ -91,7 +91,7 @@ Roadmap
 3. Finish the first version of the `rw.plot` function. 
 4. Host and run the package on ScraperWiki.
 5. Write the article `Introducing Reliefweb as a real-time source of data`. 
-6. Create a User Interface for the querier. 
+6. Create an User Interface for the querier. 
 
 
 License
