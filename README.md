@@ -7,7 +7,7 @@ This _yet-to-be-package_ is designed to query ReliefWeb's upcoming API (still in
 Installation
 ------------
 
-First install and load Hadley Wickham's `devtools` (https://github.com/hadley/devtools) by typing: 
+First, install and load Hadley Wickham's `devtools` (https://github.com/hadley/devtools) by typing: 
 
 ```r
     install.packages('devtools')
