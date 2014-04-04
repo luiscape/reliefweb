@@ -10,14 +10,14 @@ Installation
 First, install and load Hadley Wickham's `devtools` (https://github.com/hadley/devtools) by typing: 
 
 ```r
-    install.packages('devtools')
-    library(devtools)
+> install.packages('devtools')
+> library(devtools)
 ```
 
 Then use `devtools` function `install_github` pulling the code from this GitHub repo: 
 
 ```r 
-    devtools::install_github('luiscape/reliefweb')
+> devtools::install_github('luiscape/reliefweb')
 ```
 
 If everything works well the package should be installed in your system without problems.
@@ -29,19 +29,19 @@ Usage
 At this point, there is only one querying function:
 
 ```r
-    rw.query()
+> rw.query()
 ```
 
 It acceps the following paramenters:
 
 
-    `entity` = One of the five ReliefWeb entities: 'report', 'job', 'disaster', 'training', and 'country'. 
-    `limit` = The number or results you want back: a number between 1 and 1000. If you want more than 1000 use 'all'.
-    `text.query` = Use this field to make text queries to the API.
-    `query.field` = Add the fields that you want to query.
-    `query.field.value` = Submit a value for the field above. 
-    `add.fields` = The fields you want back. 
-    `csv` = In case you want the final output to be stored in a CSV file automatically. 
+    **`entity`** = One of the five ReliefWeb entities: 'report', 'job', 'disaster', 'training', and 'country'. 
+    **`limit`** = The number or results you want back: a number between 1 and 1000. If you want more than 1000 use 'all'.
+    **`text.query`** = Use this field to make text queries to the API.
+    **`query.field`** = Add the fields that you want to query.
+    **`query.field.value`** = Submit a value for the field above. 
+    **`add.fields`** = The fields you want back. 
+    **`csv`** = In case you want the final output to be stored in a CSV file automatically. 
 
 There is also a debugging function `debug = FALSE`, but you can ignore that. 
 
@@ -55,7 +55,7 @@ Let's think that you want to get all the metadata about the reports available fr
 Here is the code: 
 
 ```r
-    syria <- rw.query(entity = 'report', limit = 'all', query.field = 'country', query.field.value = 'Syria', 
+> syria <- rw.query(entity = 'report', limit = 'all', query.field = 'country', query.field.value = 'Syria', 
         add.field = c('id', 'title', 'primary_country.iso3', 'date.created'))
 ```
 The function will then run (it may take a few minutes to complete, especially if you are downloading hundreds of thousands of entries): 
@@ -72,12 +72,12 @@ The result will be a `data.frame` with the fields you specified:
 Which you can plot using `ggplot2` into:
 
 ```r
-    library(lubridate)
-    library(ggplot2)
+> library(lubridate)
+> library(ggplot2)
     
-    ggplot(syria) + theme_bw() + 
-      geom_area(aes(created), stat = 'bin', fill = "#0988bb", alpha = 0.3) + 
-      geom_line(aes(created), stat = 'bin', color = "#0988bb", size = 1.3) 
+> ggplot(syria) + theme_bw() + 
+    geom_area(aes(created), stat = 'bin', fill = "#0988bb", alpha = 0.3) + 
+    geom_line(aes(created), stat = 'bin', color = "#0988bb", size = 1.3) 
 ```
 
 ![Plotting the number of reports for Syria.](https://raw.github.com/luiscape/reliefweb-study/master/readme/syria-plot.png)
