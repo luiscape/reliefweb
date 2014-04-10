@@ -1,7 +1,9 @@
 ReliefWeb R Package
 ===================
 
-This package is designed to query ReliefWeb's upcoming API (still in __alpha__) for statistical analysis. It allows you to fetch all the data from a certain query, effectively overriding the 1000-results limitation. The result is an R `data.frame` ready for analysis.
+This package is designed to query ReliefWeb's API for statistical analysis. It allows you to fetch all the data from a certain query, effectively overriding the 1000-results limitation. The result is an R `data.frame` ready for analysis.
+
+**Note:** The package was built using the `v0` of the API. Soon enough it will be updated to use `v.1.0.0`.
 
 
 Installation
