@@ -91,9 +91,10 @@ rw.query <- function(entity = NULL,
   # Function for building the right query when more than one field is provided.
   many.fields <- function(qf = NULL) { 
     
-    ifelse(all(is.na(match(qf, 'date.created')) == TRUE), qf[length(qf) + 1] <- 'date.created', '')
+    if (entity == "country") { 
+    } else { ifelse(all(is.na(match(qf, 'date.created')) == TRUE), qf[length(qf) + 1] <- 'date.created', '') }
     
-    # date.created is a default field due to sorting.
+    # date.created is a default field due to sorting -- unless country.
     
     all.fields.url.list <- list()
     for (i in 0:(length(qf) - 1)) { 
@@ -118,7 +119,7 @@ rw.query <- function(entity = NULL,
                     text.query.url,
                     query.field.url,
                     add.fields.url,
-                    "&sort[0]=date.created:desc",
+                    ifelse(entity != "country", "&sort[0]=date.created:desc", ""), 
                     sep = "")
 
   #### Fetching the data. ####
@@ -138,7 +139,7 @@ rw.query <- function(entity = NULL,
   query <- data.frame(fromJSON(getURLContent(query.url)))
 
   # Function to convert the nested lists into rows in the data.frame.
-  rw.fields <- function(df = "NA") {
+  rw.fields <- function(df = NULL) {
   
     for (i in 1:length(add.fields)) {
       
@@ -187,7 +188,9 @@ rw.query <- function(entity = NULL,
 
           to <- format(final$created[nrow(final)], scientific = FALSE)
 
-          it.url <- paste(query.url, "&filter[field]=date.created&filter[value][to]=", to, sep = "")
+          it.url <- paste(query.url, 
+                          ifelse(entity == "country", "&filter[field]=date.created&filter[value][to]=", ""), 
+                          to, sep = "")
 
           if (debug == TRUE) {
             print(paste("This is the it.url", it.url, sep = ""))
