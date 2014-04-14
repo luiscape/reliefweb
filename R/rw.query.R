@@ -135,7 +135,7 @@ rw.query <- function(entity = NULL,
   #### Enhancement #### 
   # Here I am querying the url and getting a base data.frame. 
   # It would probably be better to implement this process within the iteration bellow.
-  # Using `jsonlite` and `RCurl` to fetch JSON from the URL.
+  # Using `jsonlite` to fetch JSON from the URL.
   query <- data.frame(fromJSON(getURLContent(query.url)))
 
   # Function to convert the nested lists into rows in the data.frame.
@@ -169,7 +169,8 @@ rw.query <- function(entity = NULL,
   
 
   # UI element.
-  print(paste("Fetching ~", ifelse(is.null(limit) == TRUE, 10, ifelse(identical(limit,all) == TRUE, count, limit)), " records.", sep = ""))
+  print(paste("Fetching ~", ifelse(is.null(limit) == TRUE, 10, ifelse(identical(limit,all) == TRUE, count, limit)), 
+              " records.", sep = ""))
   
   # Creating iterations to go around the 1000-results limitation.
   rw.it <- function(df = NULL) {
@@ -183,11 +184,13 @@ rw.query <- function(entity = NULL,
       pb <- txtProgressBar(min = 0, max = total, style = 3)
 
       for (i in 2:total) {
-        # Update progress bar.
-        setTxtProgressBar(pb, i)
-
+        
+        setTxtProgressBar(pb, i)  # Updates progress bar.
+            
+          # Collects the latest date entry collected.
           to <- format(final$created[nrow(final)], scientific = FALSE)
-
+          
+          # Creates an URL with the latest date collected.
           it.url <- paste(query.url, 
                           ifelse(entity == "country", "&filter[field]=date.created&filter[value][to]=", ""), 
                           to, sep = "")
@@ -197,10 +200,17 @@ rw.query <- function(entity = NULL,
             print(paste("From iteration number ", i, sep = ""))
           }
 
-          x <- data.frame(fromJSON(getURLContent(it.url)))
-          x <- rw.fields(df = x)
-          final <- rbind(final, x)
-        
+          ## Error handling function for each iteration.
+            tryCatch(x <- data.frame(fromJSON(getURLContent(it.url))), 
+                     error = function(e) { 
+                         print("There was an error in the URL queried. Skipping ...")
+                         final <- final
+                     }, 
+                     finally = { 
+                         x <- rw.fields(df = x)  # Cleaning fields.
+                         final <- rbind(final, x)
+                        }
+                     ) 
         }
       close(pb)
     return(final)
