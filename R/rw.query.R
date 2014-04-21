@@ -138,7 +138,7 @@ rw.query <- function(entity = NULL,
   # Using `jsonlite` to fetch JSON from the URL.
   query <- data.frame(fromJSON(getURLContent(query.url)))
 
-  # Function to convert the nested lists into rows in the data.frame.
+  # Function to convert the resulting lits into rows in the data.frame
   rw.fields <- function(df = NULL) {
   
     for (i in 1:length(add.fields)) {
@@ -146,8 +146,11 @@ rw.query <- function(entity = NULL,
       ## Multi Fields ##
       # Multi fields not implemented. Will be implemented in future version.
       # if (length(df$data.list.fields[i]) > 1) { x <- paste(df$data.list.fields[i], collapse = ",") }  
+     
+        
+        if (length(df$data.list.fields[i]) <= 1) { x <- data.frame(as.list(df$data.list.fields[i]))  }
       
-      if (length(df$data.list.fields[i]) <= 1) { x <- data.frame(as.list(df$data.list.fields[i])) }
+      
       df <- cbind(df, x)
     }
     df$data.list.fields <- NULL
@@ -175,7 +178,10 @@ rw.query <- function(entity = NULL,
   # Creating iterations to go around the 1000-results limitation.
   rw.it <- function(df = NULL) {
     
-      to <- df$created[nrow(df)]
+      
+      if ('created' %in% names(df) == TRUE) { to <- df$created[nrow(df)] }
+      if ('date' %in% names(df) == TRUE) { to <- df$created[nrow(df)] }
+      
       final <- df
 
       # Create progress bar.
@@ -188,19 +194,28 @@ rw.query <- function(entity = NULL,
         setTxtProgressBar(pb, i)  # Updates progress bar.
             
           # Collects the latest date entry collected.
-          to <- format(final$created[nrow(final)], scientific = FALSE)
+          if ('created' %in% names(final) == TRUE) { 
+              to <- format(final$created[nrow(final)], scientific = FALSE) 
+          }
+        
+          if ('date' %in% names(final) == TRUE) { 
+              to <- format(final$created[nrow(final)], scientific = FALSE) 
+          }
+        
+        
           
           # Creates an URL with the latest date collected.
-          it.url <- paste(query.url, 
-                          ifelse(entity == "country", "&filter[field]=date.created&filter[value][to]=", ""), 
-                          to, sep = "")
+          it.url <- paste(query.url, "&filter[field]=date.created&filter[value][to]=", 
+#                           ifelse(entity == "country", 
+#                                  "&filter[field]=date.created&filter[value][to]=", ""), 
+                                 to, sep = "")
 
           if (debug == TRUE) {
             print(paste("This is the it.url", it.url, sep = ""))
             print(paste("From iteration number ", i, sep = ""))
           }
 
-          ## Error handling function for each iteration.
+            ## Error handling function for each iteration.
             tryCatch(x <- data.frame(fromJSON(getURLContent(it.url))), 
                      error = function(e) { 
                          print("There was an error in the URL queried. Skipping ...")
@@ -223,7 +238,7 @@ rw.query <- function(entity = NULL,
 
   #### Cleaning the resulting data. ####
   # Transform dates from Epoch to year-month-day.
-  rw.time <- function(df = "NA") {
+  rw.time <- function(df = NULL) {
     df$created <- df$created/1000 # To eliminate the miliseconds.
     df$created <- as.Date(as.POSIXct(as.numeric(df$created), origin = "1970-01-01"))
     return(df)
@@ -231,30 +246,23 @@ rw.query <- function(entity = NULL,
 
   query <- rw.time(df = query)
   
-  if (debug == TRUE) {
-    before.duplicates <- nrow(query)
-  }
-
-  # Cleaning duplicate entries.
-  rw.clean.duplicates <- function(df = "NA") {
-    query$duplicated <- duplicated(query)
-    x <- subset(query, query$duplicated == FALSE)
-    x$duplicated <- NULL
-    return(x)
-  }
-
-  query <- rw.clean.duplicates(query)
-  
-  
-  if (debug == TRUE) { 
-    # UI element     
-    after.duplicates <- nrow(query)
-    duplicates <- before.duplicates - after.duplicates
-    print(paste("There were ", duplicates, " duplicats in the query."))
-  }
 
   # Keeping only the columns of interest.
   query <- query[,10:ncol(query)]
+
+
+    if (debug == TRUE) {
+        before.duplicates <- nrow(query)
+    }
+    
+    query <- unique(query)
+    
+    if (debug == TRUE) { 
+        # UI element     
+        after.duplicates <- nrow(query)
+        duplicates <- before.duplicates - after.duplicates
+        print(paste("There were ", duplicates, " duplicates in the query."))
+    }
 
 #   # Storing the resulting data in a CSV file. 
   if (csv == TRUE) {
