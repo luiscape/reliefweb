@@ -54,12 +54,25 @@ rw.query <- function(entity = NULL,
   if ("RCurl" %in% rownames(installed.packages()) == FALSE) install.packages("RCurl")
   if ("jsonlite" %in% rownames(installed.packages()) == FALSE) install.packages("jsonlite")
   
-  if (is.null(query.field) == TRUE && is.null(text.query) == TRUE) { stop("You have to either provide a `text.query' input or a `query.field` + `query.field.value` input.") }
-  if (is.null(query.field) == FALSE && is.null(query.field.value) == TRUE) { stop("Please provide a value with a query field.") }
+  if (is.null(query.field) == TRUE && is.null(text.query) == TRUE) { 
+      stop("You have to either provide a `text.query' input or a `query.field` + `query.field.value` input.") 
+  }
+  
+  if (is.null(query.field) == FALSE && is.null(query.field.value) == TRUE) { 
+      stop("Please provide a value with a query field.") 
+  }
   if (length(query.field) > 1) { stop('Please provide only one query field. Run rw.query.fields() if you are in doubt.') }
-  if (is.null(limit) == FALSE && limit < 0 && tolower(limit) != "all") { stop('Please provide an integer between 1 and 1000 or all.') }
-  if (is.null(limit) == FALSE && limit > 1000 && tolower(limit) != "all") { stop('Please provide an integer between 1 and 1000 or all.') }  # Increase the upper limit of the function.
+  
+  if (is.null(limit) == FALSE && limit < 0 && tolower(limit) != "all") { 
+      stop('Please provide an integer between 1 and 1000 or all.') 
+  }
+  
+  if (is.null(limit) == FALSE && limit > 1000 && tolower(limit) != "all") { 
+      stop('Please provide an integer between 1 and 1000 or all.') 
+  }  # Increase the upper limit of the function.
+  
   if (is.null(limit) == FALSE) { limit <- tolower(limit) }
+  
   all <- "all"
 
   
@@ -81,21 +94,24 @@ rw.query <- function(entity = NULL,
                               sep = "")
       warning('In this version searching the open text field \nwill override whatever other field you have\nincluded the `query` paramenter. In further \nversions the open text field will allow you to\nfurther refine your search.')
   }
+  
   if (is.null(query.field) == FALSE) { query.field.url <- paste("query[value]=", 
                                                                 query.field, 
                                                                 ":", 
                                                                 query.field.value, 
                                                                 sep = "") }
+  
   if (is.null(query.field) == TRUE) { query.field.url <- NULL }
   
   # Function for building the right query when more than one field is provided.
   many.fields <- function(qf = NULL) { 
+      
+    # When the entity 'country' or 'source' is provided, don't add the 'date.created'. 
+    if (entity == "country" | entity == "source") { qf <- qf
+    } else { ifelse(all(is.na(match(qf, 'date.created')) == TRUE), 
+                    qf[length(qf) + 1] <- 'date.created', '') }
     
-    if (entity == "country") { 
-    } else { ifelse(all(is.na(match(qf, 'date.created')) == TRUE), qf[length(qf) + 1] <- 'date.created', '') }
-    
-    # date.created is a default field due to sorting -- unless country.
-    
+    # date.created is a default field due to sorting -- unless country or source.
     all.fields.url.list <- list()
     for (i in 0:(length(qf) - 1)) { 
       field.url <- paste("fields[include][",i,"]=", qf[i + 1], sep = "")
@@ -113,13 +129,15 @@ rw.query <- function(entity = NULL,
   
   ## Building URL for aquiring data. ##
   api.url <- "http://api.rwlabs.org/v0/"
+  if (entity != "country" & entity != "source") { date.created.url <- "&sort[0]=date.created:desc" }
+  else { date.created.url <- "" }
   query.url <- paste(api.url,
                     entity.url,
                     limit.url,
                     text.query.url,
                     query.field.url,
                     add.fields.url,
-                    ifelse(entity != "country", "&sort[0]=date.created:desc", ""), 
+                    date.created.url, 
                     sep = "")
 
   #### Fetching the data. ####
